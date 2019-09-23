@@ -49,7 +49,7 @@ const details = (
 };
 
 export default ESLintUtils.RuleCreator(name => name)({
-  name: '@dczajkowski/custom-rules/ordered-imports',
+  name: 'ordered-imports',
   meta: {
     type: 'problem',
     docs: {
