@@ -9,7 +9,7 @@ const sortImportStatements = (importStatements: ImportDeclaration[]): ImportDecl
   _.sortBy(
     importStatements,
     ({ source: { value } }) => {
-      const [leadingDots] =
+      const [leadingDots]: RegExpMatchArray =
         _.toString(value)
           .replace('/', '')
           .match(/^\.+/) || [];
