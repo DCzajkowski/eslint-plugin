@@ -103,14 +103,11 @@ ruleTester.run('ordered-imports', rule, {
       output: `
       import 'a';
       import 'b';
-
       import '../../a';
       import '../../b';
-
       import '../a';
       import '../b';
       import './a';
-
       import './b';
       `,
     },
@@ -127,6 +124,32 @@ ruleTester.run('ordered-imports', rule, {
       import 'b';
 
       const a: string = ''
+      `,
+    },
+    {
+      code: `
+      import 'a';
+      import '../../a';
+
+      import '../../b';
+      import 'b';
+
+      import '../b';
+      import './a';
+      import '../a';
+
+      import './b';
+      `,
+      errors: [{ messageId: 'importsMustBeAlphabetized', line: 2 }],
+      output: `
+      import 'a';
+      import 'b';
+      import '../../a';
+      import '../../b';
+      import '../a';
+      import '../b';
+      import './a';
+      import './b';
       `,
     },
   ],

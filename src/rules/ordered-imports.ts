@@ -24,7 +24,7 @@ const details = (
   node: ImportDeclaration,
 ): {
   nodeText: string;
-  everythingBeforeExceptFirstLine: string;
+  everythingBeforeStripped: string;
   everythingAfterSameLine: string;
 } => {
   const tokenBefore = sourceCode.getTokenBefore(node);
@@ -38,10 +38,14 @@ const details = (
     .getText(node, 0, (tokenAfter ? tokenAfter.range[0] : 0) - node.range[1])
     .replace(new RegExp(`^${_.escapeRegExp(nodeText)}`), '');
 
+  // Contains source code after the import statement until the newline character
   const everythingAfterSameLine = everythingAfter.substring(0, everythingAfter.indexOf('\n'));
-  const everythingBeforeExceptFirstLine = everythingBefore.substring(everythingBefore.indexOf('\n'));
 
-  return { nodeText, everythingBeforeExceptFirstLine, everythingAfterSameLine };
+  // Contains source code before the import statement until last newline character
+  // (first newline after previous import) stripped off of double empty lines.
+  const everythingBeforeStripped = everythingBefore.substring(everythingBefore.indexOf('\n')).replace(/\n\n/g, '\n');
+
+  return { nodeText, everythingBeforeStripped, everythingAfterSameLine };
 };
 
 export default ESLintUtils.RuleCreator(name => name)({
@@ -85,7 +89,7 @@ export default ESLintUtils.RuleCreator(name => name)({
 
         const importBlockBeginning =
           _.first(unsortedImportStatements)!.actual.range[0] -
-          details(sourceCode, unsortedImportStatements[0].actual).everythingBeforeExceptFirstLine.length;
+          details(sourceCode, unsortedImportStatements[0].actual).everythingBeforeStripped.length;
 
         const importBlockEnd =
           _.last(unsortedImportStatements)!.actual.range[1] +
@@ -93,12 +97,9 @@ export default ESLintUtils.RuleCreator(name => name)({
 
         const sortedImportStatementsText = unsortedImportStatements
           .map(({ expected }) => {
-            const { everythingBeforeExceptFirstLine, nodeText, everythingAfterSameLine } = details(
-              sourceCode,
-              expected,
-            );
+            const { everythingBeforeStripped, nodeText, everythingAfterSameLine } = details(sourceCode, expected);
 
-            return `${everythingBeforeExceptFirstLine}${nodeText}${everythingAfterSameLine}`;
+            return `${everythingBeforeStripped}${nodeText}${everythingAfterSameLine}`;
           })
           .join('');
 
