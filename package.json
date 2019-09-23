@@ -4,7 +4,9 @@
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "build": "tsc --project .",
+    "prepublish": "yarn build"
   },
   "devDependencies": {
     "@types/eslint": "^6.1.1",
