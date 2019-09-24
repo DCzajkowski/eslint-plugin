@@ -3,43 +3,43 @@ import { ruleTester } from '../RuleTester';
 
 ruleTester.run('ordered-imports', rule, {
   valid: [
-    // {
-    //   code: ``,
-    // },
-    // {
-    //   code: `const a: string = '';`,
-    // },
-    // {
-    //   code: `
-    //   import 'a';
-    //   import 'b';
-    //   import '../../a';
-    //   import '../../b';
-    //   import '../a';
-    //   import '../b';
-    //   import './a';
-    //   import './b';
-    //   `,
-    // },
-    // {
-    //   code: `
-    //   import 'a';
-    //   import 'b';
-    //   import '../../a';
-    //   import '../../b';
-    //   import '../a';
-    //   import '../b';
-    //   import './a';
-    //   import './b';
-    //   `,
-    // },
-    // {
-    //   code: `
-    //   import 'a';
-    //   import 'b';
-    //   const a: string = ''
-    //   `,
-    // },
+    {
+      code: ``,
+    },
+    {
+      code: `const a: string = '';`,
+    },
+    {
+      code: `
+      import 'a';
+      import 'b';
+      import '../../a';
+      import '../../b';
+      import '../a';
+      import '../b';
+      import './a';
+      import './b';
+      `,
+    },
+    {
+      code: `
+      import 'a';
+      import 'b';
+      import '../../a';
+      import '../../b';
+      import '../a';
+      import '../b';
+      import './a';
+      import './b';
+      `,
+    },
+    {
+      code: `
+      import 'a';
+      import 'b';
+      const a: string = ''
+      `,
+    },
   ],
 
   invalid: [
@@ -155,21 +155,21 @@ import 'b';
 import 'c';
       `,
     },
-    // {
-    //   code: `/* comment for file */
+    {
+      code: `/* comment for file */
 
-    //   import 'b';
-    //   import 'a';
-    //   import 'c';
-    //   `,
-    //   errors: [{ messageId: 'importsMustBeAlphabetized', line: 2 }],
-    //   output: `/* comment for file */
+import 'b';
+import 'a';
+import 'c';
+      `,
+      errors: [{ messageId: 'importsMustBeAlphabetized', line: 3 }],
+      output: `/* comment for file */
 
-    //   import 'a';
-    //   import 'b';
-    //   import 'c';
-    //   `,
-    // },
+import 'a';
+import 'b';
+import 'c';
+      `,
+    },
     // {
     //   code: `/* comment for file */
 

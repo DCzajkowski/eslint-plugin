@@ -24,6 +24,7 @@ const details = (
   node: ImportDeclaration,
 ): {
   nodeText: string;
+  everythingBefore: string;
   everythingBeforeStripped: string;
   everythingAfterSameLine: string;
 } => {
@@ -52,9 +53,7 @@ const details = (
     : everythingBefore
   ).replace(/\n\n/g, '\n');
 
-  // console.log({ nodeText, everythingAfterSameLine, everythingBeforeStripped });
-
-  return { nodeText, everythingBeforeStripped, everythingAfterSameLine };
+  return { nodeText, everythingBefore, everythingBeforeStripped, everythingAfterSameLine };
 };
 
 export default ESLintUtils.RuleCreator(name => name)({
@@ -74,8 +73,6 @@ export default ESLintUtils.RuleCreator(name => name)({
   },
   defaultOptions: [],
   create(context) {
-    console.log('RRAAANN');
-
     return {
       Program(program): void {
         const programBody = program.body;
@@ -105,8 +102,6 @@ export default ESLintUtils.RuleCreator(name => name)({
         const sourceCode = context.getSourceCode();
 
         const importBlockBeginning = 0;
-        // _.first(unsortedImportStatements)!.actual.range[0] -
-        // details(sourceCode, unsortedImportStatements[0].actual).everythingBeforeStripped.length;
 
         const importBlockEnd =
           _.last(unsortedImportStatements)!.actual.range[1] +
@@ -117,7 +112,8 @@ export default ESLintUtils.RuleCreator(name => name)({
             const { everythingBeforeStripped, nodeText, everythingAfterSameLine } = details(sourceCode, expected);
 
             const everythingBeforeStrippedWithLeadingNewLine =
-              (expected.initialPosition === 0 ? '\n' : '') + everythingBeforeStripped;
+              (expected.initialPosition === 0 && !everythingBeforeStripped.startsWith('\n') ? '\n' : '') +
+              everythingBeforeStripped;
             const everythingBeforeStrippedWithoutLeadingNewLine =
               i === 0
                 ? everythingBeforeStrippedWithLeadingNewLine.replace(/^\n*/, '')
@@ -127,11 +123,17 @@ export default ESLintUtils.RuleCreator(name => name)({
           })
           .join('');
 
+        const fileHeaderWithGibberish = details(sourceCode, initialImportStatements[0]).everythingBefore;
+        const fileHeader = fileHeaderWithGibberish.substring(0, fileHeaderWithGibberish.lastIndexOf('\n\n'));
+
         context.report({
           node: unsortedImportStatements[0].actual,
           messageId: 'importsMustBeAlphabetized',
           fix: (fixer: RuleFixer): RuleFix =>
-            fixer.replaceTextRange([importBlockBeginning, importBlockEnd], sortedImportStatementsText),
+            fixer.replaceTextRange(
+              [importBlockBeginning, importBlockEnd],
+              (fileHeader ? `${fileHeader}\n\n` : '') + sortedImportStatementsText,
+            ),
         });
       },
     };
