@@ -170,23 +170,23 @@ import 'b';
 import 'c';
       `,
     },
-    // {
-    //   code: `/* comment for file */
+    {
+      code: `/* comment for file */
 
-    //   // comment for b
-    //   import 'b';
-    //   import 'a';
-    //   import 'c';
-    //   `,
-    //   errors: [{ messageId: 'importsMustBeAlphabetized', line: 2 }],
-    //   output: `/* comment for file */
+// comment for b
+import 'b';
+import 'a';
+import 'c';
+      `,
+      errors: [{ messageId: 'importsMustBeAlphabetized', line: 4 }],
+      output: `/* comment for file */
 
-    //   import 'a';
-    //   // comment for b
-    //   import 'b';
-    //   import 'c';
-    //   `,
-    // },
+import 'a';
+// comment for b
+import 'b';
+import 'c';
+      `,
+    },
     // {
     //   code: `/* comment for file */
 
