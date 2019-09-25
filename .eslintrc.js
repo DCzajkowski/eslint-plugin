@@ -10,7 +10,7 @@ module.exports = {
       files: ['.*.js'],
     },
     {
-      files: ['test/rules/**'],
+      files: ['test/**/*.test.ts'],
       env: {
         jest: true,
       },
