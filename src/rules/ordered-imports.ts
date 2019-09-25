@@ -1,11 +1,24 @@
 import _ from 'lodash';
 import { ImportDeclaration, Statement } from '@typescript-eslint/typescript-estree/dist/ts-estree/ts-estree';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
-import { SourceCode, RuleFixer, RuleFix } from '@typescript-eslint/experimental-utils/dist/ts-eslint';
+import { RuleContext, SourceCode, RuleFixer, RuleFix } from '@typescript-eslint/experimental-utils/dist/ts-eslint';
+import util from 'util';
+
+interface ImportStatementDetails {
+  text: string;
+  textBefore: string;
+  textAfter: string;
+}
+
+interface ImportStatement extends ImportDeclaration {
+  initialPosition: number;
+  details: ImportStatementDetails;
+  previousImportDeclaration: ImportDeclaration | null;
+}
 
 const isImport = (statement: Statement): statement is ImportDeclaration => statement.type === 'ImportDeclaration';
 
-const sortImportStatements = (importStatements: ImportDeclaration[]): ImportDeclaration[] =>
+const sortImportStatements = (importStatements: ImportStatement[]): ImportStatement[] =>
   _.sortBy(
     importStatements,
     ({ source: { value } }) => {
@@ -21,39 +34,52 @@ const sortImportStatements = (importStatements: ImportDeclaration[]): ImportDecl
 
 const details = (
   sourceCode: SourceCode,
-  node: ImportDeclaration,
-): {
-  nodeText: string;
-  everythingBefore: string;
-  everythingBeforeStripped: string;
-  everythingAfterSameLine: string;
-} => {
-  const nodeBefore = sourceCode.getTokenBefore(node);
-  const nodeAfter = sourceCode.getTokenAfter(node);
+  importDeclaration: ImportDeclaration,
+  initialPosition: number,
+): ImportStatementDetails => {
+  const tokenBefore = sourceCode.getTokenBefore(importDeclaration);
+  const tokenAfter = sourceCode.getTokenAfter(importDeclaration);
 
-  const nodeText = sourceCode.getText(node);
+  const text = sourceCode.getText(importDeclaration);
 
-  const everythingBeforeAndNode = sourceCode.getText(node, node.range[0] - (nodeBefore ? nodeBefore.range[1] : 0), 0);
-  const everythingBefore = everythingBeforeAndNode.substring(0, everythingBeforeAndNode.length - nodeText.length);
+  const textBefore = sourceCode
+    .getText(importDeclaration, tokenBefore ? importDeclaration.range[0] - tokenBefore.range[1] : Infinity)
+    .replace(new RegExp(`${_.escapeRegExp(text)}$`, 'gm'), '');
 
-  const everythingAfterAndNode = sourceCode.getText(
-    node,
-    0,
-    (nodeAfter ? nodeAfter.range[0] : sourceCode.getText().length - 1) - node.range[1],
-  );
-  const everythingAfter = everythingAfterAndNode.substring(nodeText.length);
+  return {
+    text,
+    textBefore: initialPosition === 0 && textBefore.length === 0 ? '\n' : textBefore,
+    textAfter: sourceCode
+      .getText(importDeclaration, 0, tokenAfter ? tokenAfter.range[0] - importDeclaration.range[1] : Infinity)
+      .replace(new RegExp(`^${_.escapeRegExp(text)}`, 'gm'), '')
+      .replace(/\n.+$/gm, '')
+      .replace(/\n$/, ''),
+  };
+};
 
-  // Contains source code after the import statement until the newline character
-  const everythingAfterSameLine = everythingAfter.substring(0, everythingAfter.indexOf('\n'));
+const importDeclarationToImportStatement = (sourceCode: SourceCode) => (
+  importDeclaration: ImportDeclaration,
+  initialPosition: number,
+  importDeclarations: ImportDeclaration[],
+): ImportStatement => ({
+  ...importDeclaration,
+  initialPosition,
+  previousImportDeclaration: _.get(importDeclarations, `[${initialPosition - 1}]`, null),
+  details: details(sourceCode, importDeclaration, initialPosition),
+});
 
-  // Contains source code before the import statement until last newline character
-  // (first newline after previous import) stripped off of double empty lines.
-  const everythingBeforeStripped = ((everythingBefore.match(/\n/g) || []).length > 1
-    ? everythingBefore.substring(everythingBefore.indexOf('\n'))
-    : everythingBefore
-  ).replace(/\n\n/g, '\n');
+const groupImportStatements = (importStatements: ImportStatement[]): ImportStatement[][] => {
+  const importStatementsGrouped: ImportStatement[][] = [[]];
 
-  return { nodeText, everythingBefore, everythingBeforeStripped, everythingAfterSameLine };
+  for (const importStatement of importStatements) {
+    if (importStatement.details.textBefore.includes('\n\n')) {
+      importStatementsGrouped.push([]);
+    }
+
+    importStatementsGrouped[importStatementsGrouped.length - 1].push(importStatement);
+  }
+
+  return importStatementsGrouped;
 };
 
 export default ESLintUtils.RuleCreator(name => name)({
@@ -73,69 +99,161 @@ export default ESLintUtils.RuleCreator(name => name)({
   },
   defaultOptions: [],
   create(context) {
+    const sourceCode = context.getSourceCode();
+
     return {
       Program(program): void {
         const programBody = program.body;
-        const initialImportStatements = programBody
-          .filter(isImport)
-          .map((importStatement, i) => ({ ...importStatement, initialPosition: i }));
+        const importStatements = programBody.filter(isImport).map(importDeclarationToImportStatement(sourceCode));
 
-        const sortedImportStatements = sortImportStatements(_.clone(initialImportStatements));
+        // console.log(util.inspect({ importStatements }, false, 5))
 
-        const isInitiallySorted = _.isEqual(initialImportStatements, sortedImportStatements);
-
-        if (isInitiallySorted) {
+        if (importStatements.length < 1) {
           return;
         }
 
-        interface A extends ImportDeclaration {
-          initialPosition: number;
-        }
+        const importStatementsGrouped = groupImportStatements(importStatements);
 
-        const unsortedImportStatements = _.zip(initialImportStatements, sortedImportStatements).map(
-          ([actual, expected]) => ({
-            actual: actual as A,
-            expected: expected as A,
-          }),
-        );
+        const unsortedGroups = _.zip(
+          ...[importStatementsGrouped, importStatementsGrouped].map(group => _.cloneDeep(group)),
+        )
+          .map(([actual, expected]) => [actual as ImportStatement[], expected as ImportStatement[]])
+          .map(([actual, expected]) => [actual, sortImportStatements(expected)])
+          .filter(([actual, expected]) => !_.isEqual(actual, expected))
+          .map(([, expected]) => expected);
 
-        const sourceCode = context.getSourceCode();
+        unsortedGroups.forEach(group => {
+          const firstImportStatement = _.first(group)!;
+          const lastImportStatement = _.last(group)!;
 
-        const importBlockBeginning = 0;
+          // if (firstImportStatement.details.textBefore === '') {
+          //   firstImportStatement.details.textBefore = '\n';
+          // } else if (firstImportStatement.details.textBefore.startsWith('\n\n')) {
+          //   firstImportStatement.details.textBefore = firstImportStatement.details.textBefore.substring(1);
+          // }
 
-        const importBlockEnd =
-          _.last(unsortedImportStatements)!.actual.range[1] +
-          details(sourceCode, _.last(unsortedImportStatements)!.actual).everythingAfterSameLine.length;
+          // if (lastImportStatement.details.textAfter.endsWith('\n\n')) {
+          //   lastImportStatement.details.textAfter = lastImportStatement.details.textAfter.substring(
+          //     0,
+          //     lastImportStatement.details.textAfter.length - 2,
+          //   );
+          // }
 
-        const sortedImportStatementsText = unsortedImportStatements
-          .map(({ expected }, i) => {
-            const { everythingBeforeStripped, nodeText, everythingAfterSameLine } = details(sourceCode, expected);
+          const groupFormatted = group.map(importStatement => {
+            // console.log('>>>><<<<');
 
-            const everythingBeforeStrippedWithLeadingNewLine =
-              (expected.initialPosition === 0 && !everythingBeforeStripped.startsWith('\n') ? '\n' : '') +
-              everythingBeforeStripped;
-            const everythingBeforeStrippedWithoutLeadingNewLine =
-              i === 0
-                ? everythingBeforeStrippedWithLeadingNewLine.replace(/^\n*/, '')
-                : everythingBeforeStrippedWithLeadingNewLine;
+            let textBefore = importStatement.details.textBefore;
 
-            return `${everythingBeforeStrippedWithoutLeadingNewLine}${nodeText}${everythingAfterSameLine}`;
-          })
-          .join('');
+            // console.log(JSON.stringify(textBefore), importStatement.previousImportDeclaration);
 
-        const fileHeaderWithGibberish = details(sourceCode, initialImportStatements[0]).everythingBefore;
-        const fileHeader = fileHeaderWithGibberish.substring(0, fileHeaderWithGibberish.lastIndexOf('\n\n'));
+            if (importStatement.previousImportDeclaration !== null) {
+              textBefore = textBefore.replace(/^[^\n]*\n/m, '\n');
+            }
 
-        context.report({
-          node: unsortedImportStatements[0].actual,
-          messageId: 'importsMustBeAlphabetized',
-          fix: (fixer: RuleFixer): RuleFix =>
-            fixer.replaceTextRange(
-              [importBlockBeginning, importBlockEnd],
-              (fileHeader ? `${fileHeader}\n\n` : '') + sortedImportStatementsText,
-            ),
+            // console.log(JSON.stringify(textBefore));
+
+            if (textBefore.includes('\n\n')) {
+              textBefore = textBefore.substring(textBefore.lastIndexOf('\n\n') + 2);
+            }
+
+            // console.log(JSON.stringify(textBefore));
+
+            if (!textBefore.startsWith('\n')) {
+              textBefore = `\n${textBefore}`;
+            }
+
+            // console.log(JSON.stringify(textBefore));
+
+            return {
+              ...importStatement,
+              details: {
+                ...importStatement.details,
+                textBefore,
+              },
+            };
+          });
+
+          console.log(groupFormatted.map(({ details }) => details));
+
+          // const groupBeginIndex = firstImportStatement.range[0] - firstImportStatement.details.textBefore.length;
+          // const groupEndIndex = lastImportStatement.range[1] + lastImportStatement.details.textAfter.length;
+
+          // context.report({
+          //   node: firstImportStatement,
+          //   messageId: 'importsMustBeAlphabetized',
+          //   fix(fixer: RuleFixer): RuleFix {
+          //     console.log(group.map(({ details }) => details));
+
+          //     return fixer.replaceTextRange(
+          //       [groupBeginIndex, groupEndIndex],
+          //       group
+          //         .map(({ details: { text, textAfter, textBefore } }) => `${textBefore}${text}${textAfter}`)
+          //         .join(''),
+          //     );
+          //   },
+          // });
         });
       },
+      // Program(program): void {
+      //   const programBody = program.body;
+      //   const initialImportStatements = programBody
+      //     .filter(isImport)
+      //     .map((importDeclaration, i): ImportStatement => ({ ...importDeclaration, initialPosition: i }));
+
+      //   const sortedImportStatements = sortImportStatements(_.clone(initialImportStatements));
+
+      //   const isInitiallySorted = _.isEqual(initialImportStatements, sortedImportStatements);
+
+      //   console.log({ initialImportStatements });
+
+      //   if (isInitiallySorted) {
+      //     return;
+      //   }
+
+      //   const unsortedImportStatements = _.zip(initialImportStatements, sortedImportStatements).map(
+      //     ([actual, expected]) => ({
+      //       actual: actual as ImportStatement,
+      //       expected: expected as ImportStatement,
+      //     }),
+      //   );
+
+      //   const sourceCode = context.getSourceCode();
+
+      //   const importBlockBeginning = 0;
+
+      //   const importBlockEnd =
+      //     _.last(unsortedImportStatements)!.actual.range[1] +
+      //     details(sourceCode, _.last(unsortedImportStatements)!.actual).everythingAfterSameLine.length;
+
+      //   const sortedImportStatementsText = unsortedImportStatements
+      //     .map(({ expected }, i) => {
+      //       const { everythingBeforeStripped, nodeText, everythingAfterSameLine } = details(sourceCode, expected);
+
+      //       const everythingBeforeStrippedWithLeadingNewLine =
+      //         (expected.initialPosition === 0 && !everythingBeforeStripped.startsWith('\n') ? '\n' : '') +
+      //         everythingBeforeStripped;
+      //       const everythingBeforeStrippedWithoutLeadingNewLine =
+      //         i === 0
+      //           ? everythingBeforeStrippedWithLeadingNewLine.replace(/^\n*/, '')
+      //           : everythingBeforeStrippedWithLeadingNewLine;
+
+      //       return `${everythingBeforeStrippedWithoutLeadingNewLine}${nodeText}${everythingAfterSameLine}`;
+      //     })
+      //     .join('');
+
+      //   const fileHeaderWithGibberish = details(sourceCode, initialImportStatements[0]).everythingBefore;
+      //   const fileHeader = fileHeaderWithGibberish.substring(0, fileHeaderWithGibberish.lastIndexOf('\n\n'));
+
+      //   context.report({
+      //     node: unsortedImportStatements[0].actual,
+      //     messageId: 'importsMustBeAlphabetized',
+      //     fix: (fixer: RuleFixer): RuleFix =>
+      //       fixer.replaceTextRange(
+      //         [importBlockBeginning, importBlockEnd],
+      //         (fileHeader ? `${fileHeader}\n\n` : '') + sortedImportStatementsText,
+      //       ),
+      //   });
+      // },
     };
   },
 });
