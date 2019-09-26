@@ -67,19 +67,48 @@ const importDeclarationToImportStatement = (sourceCode: SourceCode) => (
   details: details(sourceCode, importDeclaration, initialPosition),
 });
 
-const groupImportStatements = (importStatements: ImportStatement[]): ImportStatement[][] => {
-  const importStatementsGrouped: ImportStatement[][] = [[]];
+const groupImportStatements = (importStatements: ImportStatement[]): ImportStatement[][] =>
+  importStatements.reduce<ImportStatement[][]>(
+    (importStatementsGrouped, importStatement) =>
+      importStatement.details.textBefore.includes('\n\n')
+        ? [...importStatementsGrouped, [importStatement]]
+        : [...importStatementsGrouped.slice(0, -1), [..._.last(importStatementsGrouped)!, importStatement]],
+    [[]],
+  );
 
-  for (const importStatement of importStatements) {
-    if (importStatement.details.textBefore.includes('\n\n')) {
-      importStatementsGrouped.push([]);
+const formatActual = (group: ImportStatement[]): ImportStatement[] =>
+  group.map(importStatement => {
+    let textBefore = importStatement.details.textBefore;
+
+    if (importStatement.previousImportDeclaration !== null) {
+      textBefore = textBefore.replace(/^[^\n]*\n/m, '\n');
     }
 
-    importStatementsGrouped[importStatementsGrouped.length - 1].push(importStatement);
-  }
+    if (textBefore.includes('\n\n')) {
+      textBefore = textBefore.substring(textBefore.lastIndexOf('\n\n') + 2);
+    }
 
-  return importStatementsGrouped;
-};
+    if (!textBefore.startsWith('\n')) {
+      textBefore = `\n${textBefore}`;
+    }
+
+    return {
+      ...importStatement,
+      details: {
+        ...importStatement.details,
+        textBefore,
+      },
+    };
+  });
+
+const formatExpected = (group: ImportStatement[]): ImportStatement[] =>
+  formatActual(group).map(importStatement => ({
+    ...importStatement,
+    details: {
+      ...importStatement.details,
+      textAfter: importStatement.details.textAfter.trimEnd(),
+    },
+  }));
 
 export default ESLintUtils.RuleCreator(name => name)({
   name: 'ordered-imports',
@@ -110,40 +139,6 @@ export default ESLintUtils.RuleCreator(name => name)({
         }
 
         const importStatementsGrouped = groupImportStatements(importStatements);
-
-        const formatActual = (group: ImportStatement[]): ImportStatement[] =>
-          group.map(importStatement => {
-            let textBefore = importStatement.details.textBefore;
-
-            if (importStatement.previousImportDeclaration !== null) {
-              textBefore = textBefore.replace(/^[^\n]*\n/m, '\n');
-            }
-
-            if (textBefore.includes('\n\n')) {
-              textBefore = textBefore.substring(textBefore.lastIndexOf('\n\n') + 2);
-            }
-
-            if (!textBefore.startsWith('\n')) {
-              textBefore = `\n${textBefore}`;
-            }
-
-            return {
-              ...importStatement,
-              details: {
-                ...importStatement.details,
-                textBefore,
-              },
-            };
-          });
-
-        const formatExpected = (group: ImportStatement[]): ImportStatement[] =>
-          formatActual(group).map(importStatement => ({
-            ...importStatement,
-            details: {
-              ...importStatement.details,
-              textAfter: importStatement.details.textAfter.trimEnd(),
-            },
-          }));
 
         const groups = _.zip(...[importStatementsGrouped, importStatementsGrouped].map(group => _.cloneDeep(group)))
           .map(([actual, expected]) => [actual as ImportStatement[], expected as ImportStatement[]])
