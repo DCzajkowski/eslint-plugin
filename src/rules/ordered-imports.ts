@@ -81,6 +81,40 @@ const groupImportStatements = (importStatements: ImportStatement[]): ImportState
   return importStatementsGrouped;
 };
 
+const formatActual = (group: ImportStatement[]): ImportStatement[] =>
+  group.map(importStatement => {
+    let textBefore = importStatement.details.textBefore;
+
+    if (importStatement.previousImportDeclaration !== null) {
+      textBefore = textBefore.replace(/^[^\n]*\n/m, '\n');
+    }
+
+    if (textBefore.includes('\n\n')) {
+      textBefore = textBefore.substring(textBefore.lastIndexOf('\n\n') + 2);
+    }
+
+    if (!textBefore.startsWith('\n')) {
+      textBefore = `\n${textBefore}`;
+    }
+
+    return {
+      ...importStatement,
+      details: {
+        ...importStatement.details,
+        textBefore,
+      },
+    };
+  });
+
+const formatExpected = (group: ImportStatement[]): ImportStatement[] =>
+  formatActual(group).map(importStatement => ({
+    ...importStatement,
+    details: {
+      ...importStatement.details,
+      textAfter: importStatement.details.textAfter.trimEnd(),
+    },
+  }));
+
 export default ESLintUtils.RuleCreator(name => name)({
   name: 'ordered-imports',
   meta: {
@@ -110,40 +144,6 @@ export default ESLintUtils.RuleCreator(name => name)({
         }
 
         const importStatementsGrouped = groupImportStatements(importStatements);
-
-        const formatActual = (group: ImportStatement[]): ImportStatement[] =>
-          group.map(importStatement => {
-            let textBefore = importStatement.details.textBefore;
-
-            if (importStatement.previousImportDeclaration !== null) {
-              textBefore = textBefore.replace(/^[^\n]*\n/m, '\n');
-            }
-
-            if (textBefore.includes('\n\n')) {
-              textBefore = textBefore.substring(textBefore.lastIndexOf('\n\n') + 2);
-            }
-
-            if (!textBefore.startsWith('\n')) {
-              textBefore = `\n${textBefore}`;
-            }
-
-            return {
-              ...importStatement,
-              details: {
-                ...importStatement.details,
-                textBefore,
-              },
-            };
-          });
-
-        const formatExpected = (group: ImportStatement[]): ImportStatement[] =>
-          formatActual(group).map(importStatement => ({
-            ...importStatement,
-            details: {
-              ...importStatement.details,
-              textAfter: importStatement.details.textAfter.trimEnd(),
-            },
-          }));
 
         const groups = _.zip(...[importStatementsGrouped, importStatementsGrouped].map(group => _.cloneDeep(group)))
           .map(([actual, expected]) => [actual as ImportStatement[], expected as ImportStatement[]])
