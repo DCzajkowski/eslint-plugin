@@ -2,13 +2,15 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "noImplicitReturns": true,
+    "noImplicitAny": true,
     "moduleResolution": "node",
     "module": "commonjs",
     "target": "esnext",
     "lib": [
       "esnext",
       "dom"
-    ]
+    ],
+    "strict": true
   },
   "include": [
     "src/**/*.ts",

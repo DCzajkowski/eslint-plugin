@@ -1,9 +1,13 @@
 {
-  "name": "@dczajkowski/eslint-plugin-custom-rules",
-  "version": "0.2.0",
+  "name": "@dczajkowski/eslint-plugin",
+  "version": "0.3.0",
   "main": "src/index.js",
+  "license": "MIT",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "build": "tsc --project .",
+    "prepublish": "yarn build"
   },
   "devDependencies": {
     "@types/eslint": "^6.1.1",
@@ -23,5 +27,8 @@
     "prettier": "^1.18.2",
     "ts-jest": "^24.1.0",
     "typescript": "^3.6.3"
+  },
+  "peerDependencies": {
+    "eslint": ">=6.0.0"
   }
 }

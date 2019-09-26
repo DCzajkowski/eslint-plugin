@@ -3,7 +3,7 @@ import { Identifier } from '@typescript-eslint/typescript-estree/dist/ts-estree/
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
 
 export default ESLintUtils.RuleCreator(name => name)({
-  name: '@dczajkowski/custom-rules/enum-value-name',
+  name: 'enum-value-name',
   meta: {
     type: 'problem',
     docs: {
