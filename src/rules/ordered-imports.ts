@@ -67,19 +67,14 @@ const importDeclarationToImportStatement = (sourceCode: SourceCode) => (
   details: details(sourceCode, importDeclaration, initialPosition),
 });
 
-const groupImportStatements = (importStatements: ImportStatement[]): ImportStatement[][] => {
-  const importStatementsGrouped: ImportStatement[][] = [[]];
-
-  for (const importStatement of importStatements) {
-    if (importStatement.details.textBefore.includes('\n\n')) {
-      importStatementsGrouped.push([]);
-    }
-
-    importStatementsGrouped[importStatementsGrouped.length - 1].push(importStatement);
-  }
-
-  return importStatementsGrouped;
-};
+const groupImportStatements = (importStatements: ImportStatement[]): ImportStatement[][] =>
+  importStatements.reduce<ImportStatement[][]>(
+    (importStatementsGrouped, importStatement) =>
+      importStatement.details.textBefore.includes('\n\n')
+        ? [...importStatementsGrouped, [importStatement]]
+        : [...importStatementsGrouped.slice(0, -1), [..._.last(importStatementsGrouped)!, importStatement]],
+    [[]],
+  );
 
 const formatActual = (group: ImportStatement[]): ImportStatement[] =>
   group.map(importStatement => {
