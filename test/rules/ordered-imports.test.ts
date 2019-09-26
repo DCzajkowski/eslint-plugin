@@ -226,5 +226,30 @@ import 'y';
 /* eslint-enable ordered-imports */
       `,
     },
+    {
+      code: `import 'b';
+import 'a';
+
+import 'f';
+import 'e';
+
+import 'd';
+import 'c';
+      `,
+      errors: [
+        { messageId: 'importsMustBeAlphabetized', line: 1 },
+        { messageId: 'importsMustBeAlphabetized', line: 4 },
+        { messageId: 'importsMustBeAlphabetized', line: 7 },
+      ],
+      output: `import 'a';
+import 'b';
+
+import 'e';
+import 'f';
+
+import 'c';
+import 'd';
+      `,
+    },
   ],
 });
