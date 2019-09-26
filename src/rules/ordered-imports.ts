@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import { ImportDeclaration, Statement } from '@typescript-eslint/typescript-estree/dist/ts-estree/ts-estree';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
-import { RuleContext, SourceCode, RuleFixer, RuleFix } from '@typescript-eslint/experimental-utils/dist/ts-eslint';
-import util from 'util';
+import { SourceCode, RuleFixer, RuleFix } from '@typescript-eslint/experimental-utils/dist/ts-eslint';
 
 interface ImportStatementDetails {
   text: string;
