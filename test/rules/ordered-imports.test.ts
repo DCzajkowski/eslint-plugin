@@ -102,19 +102,19 @@ import './a';
 import './b';
       `,
     },
-    //     {
-    //       code: `import 'b';
-    // import 'a';
-    //
-    // const a: string = ''
-    //       `,
-    //       errors: [{ messageId: 'importsMustBeAlphabetized', line: 1 }],
-    //       output: `import 'a';
-    // import 'b';
-    //
-    // const a: string = ''
-    //       `,
-    //     },
+    {
+      code: `import 'b';
+import 'a';
+
+const a: string = ''
+      `,
+      errors: [{ messageId: 'importsMustBeAlphabetized', line: 1 }],
+      output: `import 'a';
+import 'b';
+
+const a: string = ''
+      `,
+    },
     {
       code: `import 'a';
 import '../../a';

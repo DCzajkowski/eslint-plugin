@@ -112,7 +112,7 @@ export default ESLintUtils.RuleCreator(name => name)({
 
         const importStatementsGrouped = groupImportStatements(importStatements);
 
-        const format = (group: ImportStatement[]): ImportStatement[] =>
+        const formatActual = (group: ImportStatement[]): ImportStatement[] =>
           group.map(importStatement => {
             let textBefore = importStatement.details.textBefore;
 
@@ -137,11 +137,20 @@ export default ESLintUtils.RuleCreator(name => name)({
             };
           });
 
+        const formatExpected = (group: ImportStatement[]): ImportStatement[] =>
+          formatActual(group).map(importStatement => ({
+            ...importStatement,
+            details: {
+              ...importStatement.details,
+              textAfter: importStatement.details.textAfter.trimEnd(),
+            },
+          }));
+
         const groups = _.zip(...[importStatementsGrouped, importStatementsGrouped].map(group => _.cloneDeep(group)))
           .map(([actual, expected]) => [actual as ImportStatement[], expected as ImportStatement[]])
           .map(([actual, expected]) => [actual, sortImportStatements(expected)])
           .filter(([actual, expected]) => !_.isEqual(actual, expected))
-          .map(([actual, expected]) => [format(actual), format(expected)]);
+          .map(([actual, expected]) => [formatActual(actual), formatExpected(expected)]);
 
         groups.forEach(([actualGroup, expectedGroup]) => {
           const firstActualImportStatement = _.first(actualGroup)!;
@@ -153,16 +162,14 @@ export default ESLintUtils.RuleCreator(name => name)({
           firstExpectedImportStatement.details.textBefore = firstExpectedImportStatement.details.textBefore.trimStart();
           lastExpectedImportStatement.details.textAfter = lastExpectedImportStatement.details.textAfter.trimEnd();
 
-          firstActualImportStatement.details.textBefore = firstActualImportStatement.details.textBefore.trimStart();
-          lastActualImportStatement.details.textAfter = lastActualImportStatement.details.textAfter.trimEnd();
-
           const importBlockText = expectedGroup
             .map(({ details: { textBefore, text, textAfter } }) => `${textBefore}${text}${textAfter}`)
             .join('');
 
           const groupBeginIndex =
-            firstActualImportStatement.range[0] - firstActualImportStatement.details.textBefore.length;
-          const groupEndIndex = lastActualImportStatement.range[1] + lastActualImportStatement.details.textAfter.length;
+            firstActualImportStatement.range[0] - firstActualImportStatement.details.textBefore.trimStart().length;
+          const groupEndIndex =
+            lastActualImportStatement.range[1] + lastActualImportStatement.details.textAfter.trimEnd().length;
 
           context.report({
             node: firstActualImportStatement,
