@@ -84,13 +84,10 @@ import './b';
     {
       code: `import 'a';
 import 'b';
-
 import '../../a';
 import '../../b';
-
 import '../a';
 import '../b';
-
 import './b';
 import './a';
       `,
@@ -105,30 +102,27 @@ import './a';
 import './b';
       `,
     },
-    {
-      code: `import 'b';
-import 'a';
-
-const a: string = ''
-      `,
-      errors: [{ messageId: 'importsMustBeAlphabetized', line: 1 }],
-      output: `import 'a';
-import 'b';
-
-const a: string = ''
-      `,
-    },
+    //     {
+    //       code: `import 'b';
+    // import 'a';
+    //
+    // const a: string = ''
+    //       `,
+    //       errors: [{ messageId: 'importsMustBeAlphabetized', line: 1 }],
+    //       output: `import 'a';
+    // import 'b';
+    //
+    // const a: string = ''
+    //       `,
+    //     },
     {
       code: `import 'a';
 import '../../a';
-
 import '../../b';
 import 'b';
-
 import '../b';
 import './a';
 import '../a';
-
 import './b';
       `,
       errors: [{ messageId: 'importsMustBeAlphabetized', line: 1 }],
@@ -171,15 +165,19 @@ import 'c';
       `,
     },
     {
-      code: `/* comment for file */
+      code: `/*
+  comment for file
+*/
 
 // comment for b
 import 'b';
 import 'a';
 import 'c';
       `,
-      errors: [{ messageId: 'importsMustBeAlphabetized', line: 4 }],
-      output: `/* comment for file */
+      errors: [{ messageId: 'importsMustBeAlphabetized', line: 6 }],
+      output: `/*
+  comment for file
+*/
 
 import 'a';
 // comment for b
@@ -187,59 +185,46 @@ import 'b';
 import 'c';
       `,
     },
-    // {
-    //   code: `/* comment for file */
+    {
+      code: `/* comment for file */
 
-    //   /* eslint-disable @dczajkowski/ordered-imports */
-    //   import 'z';
-    //   import 'y';
-    //   /* eslint-enable @dczajkowski/ordered-imports */
+// 1st multiline comment for d
+// 2nd multiline comment for d
+import 'd'
+import 'e'
 
-    //   // comment for b
-    //   import 'b';
-    //   import 'a';
-    //   import 'c';
-    //   `,
-    //   errors: [{ messageId: 'importsMustBeAlphabetized', line: 2 }],
-    //   output: `/* comment for file */
+// comment for b
+import 'b';
+// 1st multiline comment for a
+// 2nd multiline comment for a
+import 'a';
+import 'c';
 
-    //   /* eslint-disable @dczajkowski/ordered-imports */
-    //   import 'z';
-    //   import 'y';
-    //   /* eslint-enable @dczajkowski/ordered-imports */
+/* eslint-disable ordered-imports */
+import 'z';
+import 'y';
+/* eslint-enable ordered-imports */
+      `,
+      errors: [{ messageId: 'importsMustBeAlphabetized', line: 9 }],
+      output: `/* comment for file */
 
-    //   import 'a';
-    //   // comment for b
-    //   import 'b';
-    //   import 'c';
-    //   `,
-    // },
-    // {
-    //   code: `/* comment for file */
+// 1st multiline comment for d
+// 2nd multiline comment for d
+import 'd'
+import 'e'
 
-    //   // comment for b
-    //   import 'b';
-    //   import 'a';
-    //   import 'c';
+// 1st multiline comment for a
+// 2nd multiline comment for a
+import 'a';
+// comment for b
+import 'b';
+import 'c';
 
-    //   /* eslint-disable @dczajkowski/ordered-imports */
-    //   import 'z';
-    //   import 'y';
-    //   /* eslint-enable @dczajkowski/ordered-imports */
-    //   `,
-    //   errors: [{ messageId: 'importsMustBeAlphabetized', line: 2 }],
-    //   output: `/* comment for file */
-
-    //   import 'a';
-    //   // comment for b
-    //   import 'b';
-    //   import 'c';
-
-    //   /* eslint-disable @dczajkowski/ordered-imports */
-    //   import 'z';
-    //   import 'y';
-    //   /* eslint-enable @dczajkowski/ordered-imports */
-    //   `,
-    // },
+/* eslint-disable ordered-imports */
+import 'z';
+import 'y';
+/* eslint-enable ordered-imports */
+      `,
+    },
   ],
 });
