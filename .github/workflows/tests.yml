@@ -1,4 +1,4 @@
-name: 'Tests'
+name: 'Tests & Linter'
 
 on:
   pull_request:
@@ -13,8 +13,11 @@ jobs:
     steps:
     - uses: actions/checkout@master
 
-    - name: 'Verifies environment'
+    - name: 'Installs packages'
       run: yarn
 
-    - name: 'Run tests'
+    - name: 'Runs linter'
+      run: yarn lint
+
+    - name: 'Runs tests'
       run: yarn test
