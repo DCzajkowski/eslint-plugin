@@ -19,5 +19,28 @@ In your `.eslintrc` config:
 }
 ```
 
+## Available Rules
+### @dczajkowski/enum-value-name
+This rule forces enum value names to be PascalCase.
+
+#### Example:
+```ts
+/* Valid */
+enum A {
+  PascalCase = 0,
+  SnakeCase = 1,
+  CamelCase = 2,
+  CapitalizedWithUnderscores = 3,
+}
+
+/* Invalid */
+enum A {
+  PascalCase = 0,
+  snake_case = 1,
+  camelCase = 2,
+  CAPITALIZED_WITH_UNDERSCORES = 3,
+}
+```
+
 ## Licence
 This project is under [The MIT License (MIT)](https://github.com/DCzajkowski/eslint-plugin/blob/master/LICENSE)
