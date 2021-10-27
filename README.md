@@ -62,5 +62,66 @@ import { test5 } from './src/some/dir/test'
 import { test6 } from './../src/test6'
 ```
 
+### @dczajkowski/ordered-imports
+This rule forces alphabetized order for imports and returns the correct order if it's wrong.  
+It checks for order between imports that don't have an empty line between them. Those that have an empty line, are ordered separately.  
+When outputting the correct order, it also moves the comments along with imports.  
+You can write `/* eslint-disable ordered-imports */` in front of imports to disable ordering until `/* eslint-enable ordered-imports */` is called.
+
+#### Unordered Code Example:
+```ts
+import 'c' /* comment for c */
+/* comment for b */
+import 'b'
+import '../../c';
+import '../../b';
+import './b';
+import './c';
+
+/* eslint-disable ordered-imports */
+import 'z'
+// comment for y
+import 'y'
+import 'x'
+/* eslint-enable ordered-imports */
+
+import 'g'
+import 'f'
+
+// 1st multiline comment for d
+// 2nd multiline comment for d
+import 'd'
+// 1st multiline comment for a
+// 2nd multiline comment for a
+import 'a'
+```
+#### Corrected Code Example
+```ts
+/* comment for b */
+import 'b'
+import 'c' /* comment for c */
+import '../../b';
+import '../../c';
+import './b';
+import './c';
+
+/* eslint-disable ordered-imports */
+import 'z'
+// comment for y
+import 'y'
+import 'x'
+/* eslint-enable ordered-imports */
+
+import 'f'
+import 'g'
+
+// 1st multiline comment for a
+// 2nd multiline comment for a
+import 'a'
+// 1st multiline comment for d
+// 2nd multiline comment for d
+import 'd'
+```
+
 ## Licence
 This project is under [The MIT License (MIT)](https://github.com/DCzajkowski/eslint-plugin/blob/master/LICENSE)
