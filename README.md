@@ -62,6 +62,5 @@ import { test5 } from './src/some/dir/test'
 import { test6 } from './../src/test6'
 ```
 
-
 ## Licence
 This project is under [The MIT License (MIT)](https://github.com/DCzajkowski/eslint-plugin/blob/master/LICENSE)
