@@ -42,5 +42,26 @@ enum A {
 }
 ```
 
+### @dczajkowski/no-relative-imports
+This rule disables relative imports, so you have to use aliases instead.
+
+#### Example:
+```ts
+/* Valid */
+import test1 from '@src/test1'
+import test2 from '@module/test2'
+import test3, { test4 } from '@src/test'
+import { test5 } from '@src/some/dir/test'
+import { test6 } from '@src/test6'
+
+/* Invalid */
+import test1 from './src/test1'
+import test2 from './module/test2'
+import test3, { test4 } from './src/test'
+import { test5 } from './src/some/dir/test'
+import test6 from './../src/test6'
+```
+
+
 ## Licence
 This project is under [The MIT License (MIT)](https://github.com/DCzajkowski/eslint-plugin/blob/master/LICENSE)
