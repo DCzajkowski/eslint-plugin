@@ -65,7 +65,7 @@ import { test6 } from './../src/test6'
 ### @dczajkowski/ordered-imports
 This rule enforces alphabetized order for imports. There is an auto-fixer in place that corrects the order if it's wrong.  
 It checks for order between imports that don't have an empty line between them. Those that have an empty line, are ordered separately.  
-When outputting the correct order, it also moves the comments along with imports.  
+When auto-fixing to the correct order, it also moves the comments along with the group of imports.  
 You can write `/* eslint-disable ordered-imports */` in front of imports to disable ordering until `/* eslint-enable ordered-imports */` is called.
 
 #### Unordered Code Example:
