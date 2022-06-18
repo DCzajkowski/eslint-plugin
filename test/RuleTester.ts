@@ -3,7 +3,7 @@
  * Original file: https://github.com/typescript-eslint/typescript-eslint/blob/dfb4fd6bde880fb165542ee447baed2463790acf/packages/eslint-plugin/tests/RuleTester.ts
  */
 
-import { TSESLint, ESLintUtils } from '@typescript-eslint/experimental-utils';
+import { TSESLint, ESLintUtils } from '@typescript-eslint/utils';
 import * as path from 'path';
 
 const parser = '@typescript-eslint/parser';
@@ -45,7 +45,7 @@ class RuleTester extends TSESLint.RuleTester {
     const errorMessage = `Do not set the parser at the test level unless you want to use a parser other than ${parser}`;
 
     if (this.filename) {
-      tests.valid = tests.valid.map(test => {
+      (tests.valid as (string | TSESLint.ValidTestCase<TOptions>)[]) = tests.valid.map((test) => {
         if (typeof test === 'string') {
           return {
             code: test,
@@ -56,22 +56,22 @@ class RuleTester extends TSESLint.RuleTester {
       });
     }
 
-    tests.valid.forEach(test => {
+    tests.valid.forEach((test) => {
       if (typeof test !== 'string') {
         if (test.parser === parser) {
           throw new Error(errorMessage);
         }
         if (!test.filename) {
-          test.filename = this.filename;
+          (test.filename as string | undefined) = this.filename;
         }
       }
     });
-    tests.invalid.forEach(test => {
+    tests.invalid.forEach((test) => {
       if (test.parser === parser) {
         throw new Error(errorMessage);
       }
       if (!test.filename) {
-        test.filename = this.filename;
+        (test.filename as string | undefined) = this.filename;
       }
     });
 

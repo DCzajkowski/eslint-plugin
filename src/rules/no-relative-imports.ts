@@ -1,27 +1,11 @@
 import _ from 'lodash';
-import { ImportDeclaration, Statement } from '@typescript-eslint/typescript-estree/dist/ts-estree/ts-estree';
-import { ESLintUtils } from '@typescript-eslint/experimental-utils';
-import { SourceCode } from '@typescript-eslint/experimental-utils/dist/ts-eslint';
+import { ESLintUtils, TSESLint, AST_NODE_TYPES } from '@typescript-eslint/utils';
+import { ImportDeclaration, ProgramStatement } from '@typescript-eslint/types/dist/generated/ast-spec';
 
-interface ImportStatementDetails {
-  text: string;
-  textBefore: string;
-  textAfter: string;
-}
+const isImport = (statement: ProgramStatement): statement is ImportDeclaration =>
+  statement.type === AST_NODE_TYPES.ImportDeclaration;
 
-interface ImportStatement extends ImportDeclaration {
-  initialPosition: number;
-  details: ImportStatementDetails;
-  previousImportDeclaration: ImportDeclaration | null;
-}
-
-const isImport = (statement: Statement): statement is ImportDeclaration => statement.type === 'ImportDeclaration';
-
-const details = (
-  sourceCode: SourceCode,
-  importDeclaration: ImportDeclaration,
-  initialPosition: number,
-): ImportStatementDetails => {
+const details = (sourceCode: TSESLint.SourceCode, importDeclaration: ImportDeclaration, initialPosition: number) => {
   const tokenBefore = sourceCode.getTokenBefore(importDeclaration);
   const tokenAfter = sourceCode.getTokenAfter(importDeclaration);
 
@@ -42,24 +26,21 @@ const details = (
   };
 };
 
-const importDeclarationToImportStatement = (sourceCode: SourceCode) => (
-  importDeclaration: ImportDeclaration,
-  initialPosition: number,
-  importDeclarations: ImportDeclaration[],
-): ImportStatement => ({
-  ...importDeclaration,
-  initialPosition,
-  previousImportDeclaration: _.get(importDeclarations, `[${initialPosition - 1}]`, null),
-  details: details(sourceCode, importDeclaration, initialPosition),
-});
+const importDeclarationToImportStatement =
+  (sourceCode: TSESLint.SourceCode) =>
+  (importDeclaration: ImportDeclaration, initialPosition: number, importDeclarations: ImportDeclaration[]) => ({
+    ...importDeclaration,
+    initialPosition,
+    previousImportDeclaration: _.get(importDeclarations, `[${initialPosition - 1}]`, null),
+    details: details(sourceCode, importDeclaration, initialPosition),
+  });
 
-export default ESLintUtils.RuleCreator(name => name)({
+export default ESLintUtils.RuleCreator((name) => name)({
   name: 'no-relative-imports',
   meta: {
     type: 'problem',
     docs: {
       description: 'Require import statements not to be relative.',
-      category: 'Stylistic Issues',
       recommended: 'warn',
     },
     messages: {
@@ -75,13 +56,14 @@ export default ESLintUtils.RuleCreator(name => name)({
     return {
       Program(program): void {
         const programBody = program.body;
+
         const importStatements = programBody.filter(isImport).map(importDeclarationToImportStatement(sourceCode));
 
         if (importStatements.length < 1) {
           return;
         }
 
-        importStatements.forEach(importStatement => {
+        importStatements.forEach((importStatement) => {
           const {
             source: { value },
           } = importStatement;

@@ -1,7 +1,6 @@
 import _ from 'lodash';
-import { ImportDeclaration, Statement } from '@typescript-eslint/typescript-estree/dist/ts-estree/ts-estree';
-import { ESLintUtils } from '@typescript-eslint/experimental-utils';
-import { SourceCode, RuleFixer, RuleFix } from '@typescript-eslint/experimental-utils/dist/ts-eslint';
+import { ESLintUtils, TSESLint, AST_NODE_TYPES } from '@typescript-eslint/utils';
+import { ImportDeclaration, ProgramStatement } from '@typescript-eslint/types/dist/generated/ast-spec';
 
 interface ImportStatementDetails {
   text: string;
@@ -15,16 +14,14 @@ interface ImportStatement extends ImportDeclaration {
   previousImportDeclaration: ImportDeclaration | null;
 }
 
-const isImport = (statement: Statement): statement is ImportDeclaration => statement.type === 'ImportDeclaration';
+const isImport = (statement: ProgramStatement): statement is ImportDeclaration =>
+  statement.type === AST_NODE_TYPES.ImportDeclaration;
 
 const sortImportStatements = (importStatements: ImportStatement[]): ImportStatement[] =>
   _.sortBy(
     importStatements,
     ({ source: { value } }) => {
-      const [leadingDots]: RegExpMatchArray =
-        _.toString(value)
-          .replace('/', '')
-          .match(/^\.+/) || [];
+      const [leadingDots]: RegExpMatchArray = _.toString(value).replace('/', '').match(/^\.+/) || [];
 
       return leadingDots ? leadingDots.length * -1 : -Infinity;
     },
@@ -32,7 +29,7 @@ const sortImportStatements = (importStatements: ImportStatement[]): ImportStatem
   );
 
 const details = (
-  sourceCode: SourceCode,
+  sourceCode: TSESLint.SourceCode,
   importDeclaration: ImportDeclaration,
   initialPosition: number,
 ): ImportStatementDetails => {
@@ -56,16 +53,18 @@ const details = (
   };
 };
 
-const importDeclarationToImportStatement = (sourceCode: SourceCode) => (
-  importDeclaration: ImportDeclaration,
-  initialPosition: number,
-  importDeclarations: ImportDeclaration[],
-): ImportStatement => ({
-  ...importDeclaration,
-  initialPosition,
-  previousImportDeclaration: _.get(importDeclarations, `[${initialPosition - 1}]`, null),
-  details: details(sourceCode, importDeclaration, initialPosition),
-});
+const importDeclarationToImportStatement =
+  (sourceCode: TSESLint.SourceCode) =>
+  (
+    importDeclaration: ImportDeclaration,
+    initialPosition: number,
+    importDeclarations: ImportDeclaration[],
+  ): ImportStatement => ({
+    ...importDeclaration,
+    initialPosition,
+    previousImportDeclaration: _.get(importDeclarations, `[${initialPosition - 1}]`, null),
+    details: details(sourceCode, importDeclaration, initialPosition),
+  });
 
 const groupImportStatements = (importStatements: ImportStatement[]): ImportStatement[][] =>
   importStatements.reduce<ImportStatement[][]>(
@@ -77,7 +76,7 @@ const groupImportStatements = (importStatements: ImportStatement[]): ImportState
   );
 
 const formatActual = (group: ImportStatement[]): ImportStatement[] =>
-  group.map(importStatement => {
+  group.map((importStatement) => {
     let textBefore = importStatement.details.textBefore;
 
     if (importStatement.previousImportDeclaration !== null) {
@@ -102,7 +101,7 @@ const formatActual = (group: ImportStatement[]): ImportStatement[] =>
   });
 
 const formatExpected = (group: ImportStatement[]): ImportStatement[] =>
-  formatActual(group).map(importStatement => ({
+  formatActual(group).map((importStatement) => ({
     ...importStatement,
     details: {
       ...importStatement.details,
@@ -110,13 +109,12 @@ const formatExpected = (group: ImportStatement[]): ImportStatement[] =>
     },
   }));
 
-export default ESLintUtils.RuleCreator(name => name)({
+export default ESLintUtils.RuleCreator((name) => name)({
   name: 'ordered-imports',
   meta: {
     type: 'problem',
     docs: {
       description: 'Require import statements to be alphabetized.',
-      category: 'Stylistic Issues',
       recommended: 'warn',
     },
     messages: {
@@ -132,6 +130,7 @@ export default ESLintUtils.RuleCreator(name => name)({
     return {
       Program(program): void {
         const programBody = program.body;
+
         const importStatements = programBody.filter(isImport).map(importDeclarationToImportStatement(sourceCode));
 
         if (importStatements.length < 1) {
@@ -140,7 +139,7 @@ export default ESLintUtils.RuleCreator(name => name)({
 
         const importStatementsGrouped = groupImportStatements(importStatements);
 
-        const groups = _.zip(...[importStatementsGrouped, importStatementsGrouped].map(group => _.cloneDeep(group)))
+        const groups = _.zip(...[importStatementsGrouped, importStatementsGrouped].map((group) => _.cloneDeep(group)))
           .map(([actual, expected]) => [actual as ImportStatement[], expected as ImportStatement[]])
           .map(([actual, expected]) => [actual, sortImportStatements(expected)])
           .filter(([actual, expected]) => !_.isEqual(actual, expected))
@@ -168,7 +167,7 @@ export default ESLintUtils.RuleCreator(name => name)({
           context.report({
             node: firstActualImportStatement,
             messageId: 'importsMustBeAlphabetized',
-            fix: (fixer: RuleFixer): RuleFix =>
+            fix: (fixer: TSESLint.RuleFixer): TSESLint.RuleFix =>
               fixer.replaceTextRange([groupBeginIndex, groupEndIndex], importBlockText),
           });
         });

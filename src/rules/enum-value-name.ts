@@ -1,14 +1,13 @@
 import _ from 'lodash';
-import { Identifier } from '@typescript-eslint/typescript-estree/dist/ts-estree/ts-estree';
-import { ESLintUtils } from '@typescript-eslint/experimental-utils';
+import type { Identifier } from '@typescript-eslint/types/dist/generated/ast-spec';
+import { ESLintUtils } from '@typescript-eslint/utils';
 
-export default ESLintUtils.RuleCreator(name => name)({
+export default ESLintUtils.RuleCreator((name) => name)({
   name: 'enum-value-name',
   meta: {
     type: 'problem',
     docs: {
       description: 'Require enum value names to be in PascalCase.',
-      category: 'Stylistic Issues',
       recommended: 'warn',
     },
     messages: {

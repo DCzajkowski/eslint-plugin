@@ -3,6 +3,7 @@
     "esModuleInterop": true,
     "noImplicitReturns": true,
     "noImplicitAny": true,
+    "skipDefaultLibCheck": true,
     "moduleResolution": "node",
     "module": "commonjs",
     "target": "esnext",
