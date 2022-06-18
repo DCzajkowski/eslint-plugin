@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import type { Identifier } from '@typescript-eslint/types/dist/generated/ast-spec';
 import { ESLintUtils } from '@typescript-eslint/utils';
+import { getDocumentationUrl } from '../helpers';
 
-export default ESLintUtils.RuleCreator((name) => name)({
+export default ESLintUtils.RuleCreator(getDocumentationUrl)({
   name: 'enum-value-name',
   meta: {
     type: 'problem',
