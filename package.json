@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint . --ext .ts --max-warnings=0",
-    "build": "esbuild src/{*.ts,**/*.ts} --format=cjs --outdir=dist/",
+    "build": "esbuild src/{*.ts,**/*.ts} --format=cjs --bundle --platform=node --external:espree --outdir=dist/",
     "prepublish": "yarn build"
   },
   "devDependencies": {
