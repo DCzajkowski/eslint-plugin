@@ -9,7 +9,6 @@ export default ESLintUtils.RuleCreator(getDocumentationUrl)({
     type: 'problem',
     docs: {
       description: 'Require enum value names to be in PascalCase.',
-      recommended: 'warn',
     },
     messages: {
       incorrectValueName: 'Incorrect enum value casing. Expected PascalCase.',

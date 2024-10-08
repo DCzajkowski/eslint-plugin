@@ -3,11 +3,10 @@
  * Original file: https://github.com/typescript-eslint/typescript-eslint/blob/dfb4fd6bde880fb165542ee447baed2463790acf/packages/eslint-plugin/tests/RuleTester.ts
  */
 
-import { TSESLint, ESLintUtils } from '@typescript-eslint/utils';
+import { TSESLint } from '@typescript-eslint/utils';
 import * as path from 'path';
 
 const parser = '@typescript-eslint/parser';
-const { batchedSingleLineTests } = ESLintUtils;
 
 function getFixturesRootDir(): string {
   return path.join(process.cwd(), 'tests/fixtures/');
@@ -87,4 +86,4 @@ const ruleTester = new RuleTester({
   },
 });
 
-export { ruleTester, RuleTester, getFixturesRootDir, batchedSingleLineTests };
+export { ruleTester, RuleTester, getFixturesRootDir };
