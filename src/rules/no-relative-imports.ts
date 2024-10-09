@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { ESLintUtils } from '@typescript-eslint/utils';
 import { getDocumentationUrl, importDeclarationToImportStatement, isImport } from '../helpers';
 
