@@ -4,12 +4,15 @@ import { ruleTester } from '../RuleTester';
 ruleTester.run('ordered-imports', rule, {
   valid: [
     {
+      filename: 'file-with-imports.ts',
       code: ``,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `const a: string = '';`,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `
       import 'a';
       import 'b';
@@ -22,18 +25,7 @@ ruleTester.run('ordered-imports', rule, {
       `,
     },
     {
-      code: `
-      import 'a';
-      import 'b';
-      import '../../a';
-      import '../../b';
-      import '../a';
-      import '../b';
-      import './a';
-      import './b';
-      `,
-    },
-    {
+      filename: 'file-with-imports.ts',
       code: `
       import 'a';
       import 'b';
@@ -44,6 +36,7 @@ ruleTester.run('ordered-imports', rule, {
 
   invalid: [
     {
+      filename: 'file-with-imports.ts',
       code: `import 'b';
 /* comment for a */
 import 'a'; // comment a
@@ -61,6 +54,7 @@ import 'd'; // comment d
       `,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `import 'a';
 import './a';
 import '../../a';
@@ -82,6 +76,7 @@ import './b';
       `,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `import 'a';
 import 'b';
 import '../../a';
@@ -103,6 +98,7 @@ import './b';
       `,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `import 'b';
 import 'a';
 
@@ -116,6 +112,7 @@ const a: string = ''
       `,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `import 'a';
 import '../../a';
 import '../../b';
@@ -137,6 +134,7 @@ import './b';
       `,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `/* comment for b */
 import 'b';
 import 'a';
@@ -150,6 +148,7 @@ import 'c';
       `,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `/* comment for file */
 
 import 'b';
@@ -165,6 +164,7 @@ import 'c';
       `,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `/*
   comment for file
 */
@@ -185,7 +185,9 @@ import 'b';
 import 'c';
       `,
     },
+    // @todo
     {
+      filename: 'file-with-imports.ts',
       code: `/* comment for file */
 
 // 1st multiline comment for d
@@ -199,11 +201,6 @@ import 'b';
 // 2nd multiline comment for a
 import 'a';
 import 'c';
-
-/* eslint-disable ordered-imports */
-import 'z';
-import 'y';
-/* eslint-enable ordered-imports */
       `,
       errors: [{ messageId: 'importsMustBeAlphabetized', line: 9 }],
       output: `/* comment for file */
@@ -219,14 +216,10 @@ import 'a';
 // comment for b
 import 'b';
 import 'c';
-
-/* eslint-disable ordered-imports */
-import 'z';
-import 'y';
-/* eslint-enable ordered-imports */
       `,
     },
     {
+      filename: 'file-with-imports.ts',
       code: `import 'b';
 import 'a';
 

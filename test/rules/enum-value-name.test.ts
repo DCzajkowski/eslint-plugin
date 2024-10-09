@@ -4,6 +4,7 @@ import { ruleTester } from '../RuleTester';
 ruleTester.run('enum-value-name', rule, {
   valid: [
     {
+      filename: 'file-with-enum.ts',
       code: `
         /* 1 */ enum A {
         /* 2 */   PascalCase = 0,
@@ -17,6 +18,7 @@ ruleTester.run('enum-value-name', rule, {
 
   invalid: [
     {
+      filename: 'file-with-enum.ts',
       code: `
         /* 1 */ enum A {
         /* 2 */   PascalCase = 0,

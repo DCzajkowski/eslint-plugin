@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { TSESLint, AST_NODE_TYPES } from '@typescript-eslint/utils';
-import { ImportDeclaration, ProgramStatement } from '@typescript-eslint/types/dist/generated/ast-spec';
+import { TSESTree } from '@typescript-eslint/types';
 
 export const getDocumentationUrl = (name: string): string => {
   return `https://github.com/DCzajkowski/eslint-plugin#dczajkowski${name}`;
@@ -12,18 +12,18 @@ interface ImportStatementDetails {
   textAfter: string;
 }
 
-export interface ImportStatement extends ImportDeclaration {
+export interface ImportStatement extends TSESTree.ImportDeclaration {
   initialPosition: number;
   details: ImportStatementDetails;
-  previousImportDeclaration: ImportDeclaration | null;
+  previousImportDeclaration: TSESTree.ImportDeclaration | null;
 }
 
-export const isImport = (statement: ProgramStatement): statement is ImportDeclaration =>
+export const isImport = (statement: TSESTree.ProgramStatement): statement is TSESTree.ImportDeclaration =>
   statement.type === AST_NODE_TYPES.ImportDeclaration;
 
 export const details = (
   sourceCode: TSESLint.SourceCode,
-  importDeclaration: ImportDeclaration,
+  importDeclaration: TSESTree.ImportDeclaration,
   initialPosition: number,
 ): ImportStatementDetails => {
   const tokenBefore = sourceCode.getTokenBefore(importDeclaration);
@@ -49,9 +49,9 @@ export const details = (
 export const importDeclarationToImportStatement =
   (sourceCode: TSESLint.SourceCode) =>
   (
-    importDeclaration: ImportDeclaration,
+    importDeclaration: TSESTree.ImportDeclaration,
     initialPosition: number,
-    importDeclarations: ImportDeclaration[],
+    importDeclarations: TSESTree.ImportDeclaration[],
   ): ImportStatement => ({
     ...importDeclaration,
     initialPosition,
