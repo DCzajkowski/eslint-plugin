@@ -3,9 +3,34 @@ This is an [eslint](https://eslint.org/) plugin that provides several eslint rul
 
 ## Installation
 ```bash
-npm i @dczajkowski/eslint-plugin --save-dev # yarn add -D @dczajkowski/eslint-plugin
+npm i @dczajkowski/eslint-plugin --save-dev
+# or
+yarn add -D @dczajkowski/eslint-plugin
+# or
+pnpm add -D @dczajkowski/eslint-plugin
 ```
-## Setup
+
+## Setup (ESLint 9+ flat config)
+In your `eslint.config.js` config:
+```js
+import dczajkowski from '@dczajkowski/eslint-plugin'
+
+/** @type {import("eslint").Linter.Config[]} */
+export default [
+  {
+    'plugins': {
+      '@dczajkowski': dczajkowski,
+    },
+    'rules': {
+      '@dczajkowski/enum-value-name': 'error',
+      '@dczajkowski/no-relative-imports': 'warn',
+      '@dczajkowski/ordered-imports': 'warn',
+    },
+  },
+];
+```
+
+## Setup (ESLint 9 legacy config)
 In your `.eslintrc` config:
 
 ```json
@@ -63,9 +88,9 @@ import { test6 } from './../src/test6'
 ```
 
 ### @dczajkowski/ordered-imports
-This rule enforces alphabetized order for imports. There is an auto-fixer in place that corrects the order if it's wrong.  
-It checks for order between imports that don't have an empty line between them. Those that have an empty line, are ordered separately.  
-When auto-fixing to the correct order, it also moves the comments along with the group of imports.  
+This rule enforces alphabetized order for imports. There is an auto-fixer in place that corrects the order if it's wrong.
+It checks for order between imports that don't have an empty line between them. Those that have an empty line, are ordered separately.
+When auto-fixing to the correct order, it also moves the comments along with the group of imports.
 
 #### Unordered Code Example:
 ```ts
