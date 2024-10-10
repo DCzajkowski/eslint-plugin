@@ -10,13 +10,19 @@ export default {
     {
       dir: 'dist',
       format: 'esm',
+      entryFileNames: '[name].mjs',
+    },
+    {
+      dir: 'dist',
+      format: 'cjs',
+      entryFileNames: '[name].cjs',
     },
   ],
   external: ['@typescript-eslint/utils', 'lodash'],
   plugins: [
     typescript({
       declaration: true,
-      outDir: 'dist',
+      outDir: 'dist/types',
       include: ['src/**/*.ts'],
     }),
     terser({

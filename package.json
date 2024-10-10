@@ -1,13 +1,18 @@
 {
   "name": "@dczajkowski/eslint-plugin",
   "version": "0.6.0",
-  "main": "dist/index.js",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "test": "jest",
     "lint": "eslint . --max-warnings=0",
-    "build": "rm -rf dist && rollup -c && rm -rf dist/rules dist/helpers.*"
+    "build": "rm -rf dist && rollup -c && mv dist/types/index.d.ts dist/index.d.ts && rm -rf dist/types"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
   },
   "dependencies": {
     "@typescript-eslint/utils": "^8.8.1",
