@@ -185,7 +185,6 @@ import 'b';
 import 'c';
       `,
     },
-    // @todo
     {
       filename: 'file-with-imports.ts',
       code: `/* comment for file */
