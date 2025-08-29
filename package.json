@@ -1,6 +1,6 @@
 {
   "name": "@dczajkowski/eslint-plugin",
-  "version": "0.6.0",
+  "version": "0.7.0-rc.1",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "@typescript-eslint/utils": "^8.41.0",
-    "typescript": "^5.9.2",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "typescript": "^5.9.2"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
