@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { ESLintUtils } from '@typescript-eslint/utils';
 import { getDocumentationUrl, importDeclarationToImportStatement, isImport } from '../helpers';
 
@@ -8,7 +7,6 @@ export default ESLintUtils.RuleCreator(getDocumentationUrl)({
     type: 'problem',
     docs: {
       description: 'Require import statements not to be relative.',
-      recommended: 'warn',
     },
     messages: {
       importsCannotBeRelative: 'Imports cannot be relative',
@@ -18,7 +16,7 @@ export default ESLintUtils.RuleCreator(getDocumentationUrl)({
   },
   defaultOptions: [],
   create(context) {
-    const sourceCode = context.getSourceCode();
+    const sourceCode = context.sourceCode;
 
     return {
       Program(program): void {

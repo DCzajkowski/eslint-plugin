@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import type { Identifier } from '@typescript-eslint/types/dist/generated/ast-spec';
 import { ESLintUtils } from '@typescript-eslint/utils';
 import { getDocumentationUrl } from '../helpers';
+import { TSESTree } from '@typescript-eslint/types';
 
 export default ESLintUtils.RuleCreator(getDocumentationUrl)({
   name: 'enum-value-name',
@@ -9,7 +9,6 @@ export default ESLintUtils.RuleCreator(getDocumentationUrl)({
     type: 'problem',
     docs: {
       description: 'Require enum value names to be in PascalCase.',
-      recommended: 'warn',
     },
     messages: {
       incorrectValueName: 'Incorrect enum value casing. Expected PascalCase.',
@@ -20,7 +19,7 @@ export default ESLintUtils.RuleCreator(getDocumentationUrl)({
   create(context) {
     return {
       TSEnumMember(node): void {
-        const actual = (node.id as Identifier).name;
+        const actual = (node.id as TSESTree.Identifier).name;
         const expected = _.upperFirst(_.camelCase(actual));
 
         if (actual !== expected) {

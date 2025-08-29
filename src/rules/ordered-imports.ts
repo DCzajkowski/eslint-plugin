@@ -6,7 +6,7 @@ const sortImportStatements = (importStatements: ImportStatement[]): ImportStatem
   _.sortBy(
     importStatements,
     ({ source: { value } }) => {
-      const [leadingDots]: RegExpMatchArray = _.toString(value).replace('/', '').match(/^\.+/) || [];
+      const [leadingDots] = _.toString(value).replace('/', '').match(/^\.+/) || [null];
 
       return leadingDots ? leadingDots.length * -1 : -Infinity;
     },
@@ -62,7 +62,6 @@ export default ESLintUtils.RuleCreator(getDocumentationUrl)({
     type: 'problem',
     docs: {
       description: 'Require import statements to be alphabetized.',
-      recommended: 'warn',
     },
     messages: {
       importsMustBeAlphabetized: 'Imports must be alphabetized',
@@ -72,7 +71,7 @@ export default ESLintUtils.RuleCreator(getDocumentationUrl)({
   },
   defaultOptions: [],
   create(context) {
-    const sourceCode = context.getSourceCode();
+    const sourceCode = context.sourceCode;
 
     return {
       Program(program): void {
