@@ -1,9 +1,8 @@
-import _ from 'lodash';
-import { ESLintUtils } from '@typescript-eslint/utils';
-import { getDocumentationUrl } from '../helpers';
 import { TSESTree } from '@typescript-eslint/types';
+import _ from 'lodash';
+import { createRule } from '../helpers';
 
-export default ESLintUtils.RuleCreator(getDocumentationUrl)({
+export const enumValueName = createRule({
   name: 'enum-value-name',
   meta: {
     type: 'problem',

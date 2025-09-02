@@ -1,6 +1,6 @@
+import { TSESLint } from '@typescript-eslint/utils';
 import _ from 'lodash';
-import { ESLintUtils, TSESLint } from '@typescript-eslint/utils';
-import { getDocumentationUrl, importDeclarationToImportStatement, ImportStatement, isImport } from '../helpers';
+import { createRule, importDeclarationToImportStatement, ImportStatement, isImport } from '../helpers';
 
 const sortImportStatements = (importStatements: ImportStatement[]): ImportStatement[] =>
   _.sortBy(
@@ -56,7 +56,7 @@ const formatExpected = (group: ImportStatement[]): ImportStatement[] =>
     },
   }));
 
-export default ESLintUtils.RuleCreator(getDocumentationUrl)({
+export const orderedImports = createRule({
   name: 'ordered-imports',
   meta: {
     type: 'problem',

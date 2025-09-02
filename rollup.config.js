@@ -2,6 +2,7 @@ import typescript from '@rollup/plugin-typescript';
 import terser from '@rollup/plugin-terser';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
 
 /** @type {import('rollup').MergedRollupOptions} */
 export default {
@@ -20,10 +21,10 @@ export default {
   ],
   external: ['@typescript-eslint/utils', 'lodash'],
   plugins: [
+    json(),
     typescript({
       declaration: true,
       outDir: 'dist/types',
-      include: ['src/**/*.ts'],
     }),
     terser({
       format: {
@@ -36,6 +37,6 @@ export default {
       module: true,
     }),
     nodeResolve(),
-    commonjs(),
+    commonjs({ extensions: ['.js', '.ts'] }),
   ],
 };

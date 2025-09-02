@@ -1,7 +1,7 @@
-import rule from '../../src/rules/ordered-imports';
+import { orderedImports } from '../../src/rules/ordered-imports';
 import { ruleTester } from '../RuleTester';
 
-ruleTester.run('ordered-imports', rule, {
+ruleTester.run('ordered-imports', orderedImports, {
   valid: [
     {
       filename: 'file-with-imports.ts',

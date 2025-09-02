@@ -1,12 +1,10 @@
+import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-plugin-prettier/recommended';
 import jest from 'eslint-plugin-jest';
 
-/** @type { import("eslint").Linter.Config[] } */
-export default [
-  {
-    ignores: ['dist/*'],
-  },
+export default defineConfig([
+  globalIgnores(['dist/*']),
   ...tseslint.configs.recommended,
   {
     files: ['*.ts', '*.tsx'],
@@ -44,4 +42,4 @@ export default [
       'jest/prefer-expect-assertions': 'off',
     },
   },
-];
+]);

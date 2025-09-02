@@ -13,10 +13,11 @@ pnpm add -D @dczajkowski/eslint-plugin
 ## Setup (ESLint 9+ flat config)
 In your `eslint.config.js` config:
 ```js
-import dczajkowski from '@dczajkowski/eslint-plugin'
+import { defineConfig } from 'eslint/config';
+import dczajkowski from '@dczajkowski/eslint-plugin';
 
 /** @type {import("eslint").Linter.Config[]} */
-export default [
+export default defineConfig([
   {
     'plugins': {
       '@dczajkowski': dczajkowski,
@@ -27,7 +28,7 @@ export default [
       '@dczajkowski/ordered-imports': 'warn',
     },
   },
-];
+]);
 ```
 
 ## Setup (ESLint 9 legacy config)

@@ -1,7 +1,7 @@
-import rule from '../../src/rules/enum-value-name';
+import { enumValueName } from '../../src/rules/enum-value-name';
 import { ruleTester } from '../RuleTester';
 
-ruleTester.run('enum-value-name', rule, {
+ruleTester.run('enum-value-name', enumValueName, {
   valid: [
     {
       filename: 'file-with-enum.ts',

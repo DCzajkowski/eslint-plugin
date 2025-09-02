@@ -1,7 +1,6 @@
-import { ESLintUtils } from '@typescript-eslint/utils';
-import { getDocumentationUrl, importDeclarationToImportStatement, isImport } from '../helpers';
+import { createRule, importDeclarationToImportStatement, isImport } from '../helpers';
 
-export default ESLintUtils.RuleCreator(getDocumentationUrl)({
+export const noRelativeImports = createRule({
   name: 'no-relative-imports',
   meta: {
     type: 'problem',

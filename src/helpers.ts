@@ -1,10 +1,16 @@
 import _ from 'lodash';
-import { TSESLint, AST_NODE_TYPES } from '@typescript-eslint/utils';
+import { TSESLint, AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/utils';
 import { TSESTree } from '@typescript-eslint/types';
 
-export const getDocumentationUrl = (name: string): string => {
-  return `https://github.com/DCzajkowski/eslint-plugin#dczajkowski${name}`;
+type ExamplePluginDocs = {
+  description: string;
+  recommended?: boolean;
+  requiresTypeChecking?: boolean;
 };
+
+export const createRule = ESLintUtils.RuleCreator<ExamplePluginDocs>((name) => {
+  return `https://github.com/DCzajkowski/eslint-plugin#dczajkowski${name}`;
+});
 
 interface ImportStatementDetails {
   text: string;

@@ -1,7 +1,7 @@
-import rule from '../../src/rules/no-relative-imports';
+import { noRelativeImports } from '../../src/rules/no-relative-imports';
 import { ruleTester } from '../RuleTester';
 
-ruleTester.run('no-relative-imports', rule, {
+ruleTester.run('no-relative-imports', noRelativeImports, {
   valid: [
     {
       code: `
