@@ -5,17 +5,17 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint . --max-warnings=0",
-    "build": "bash build.sh"
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --sourcemap --cjsInterop"
   },
   "type": "module",
   "main": "./dist/index.cjs",
-  "types": "./dist/index.d.mts",
-  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index.d.mts",
-        "import": "./dist/index.mjs"
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
       },
       "require": {
         "types": "./dist/index.d.cts",
@@ -50,6 +50,7 @@
     "rollup": "^4.50.0",
     "ts-jest": "^29.4.1",
     "tslib": "^2.8.1",
+    "tsup": "^8.5.0",
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.42.0"
   },
