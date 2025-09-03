@@ -13,7 +13,16 @@ const plugin = {
     ...{ namespace: '@dczajkowski' },
   },
   configs: {
-    recommended: {},
+    recommended: {
+      plugins: {
+        '@dczajkowski': {} as ESLint.Plugin,
+      },
+      rules: {
+        '@dczajkowski/enum-value-name': 'error' as const,
+        '@dczajkowski/no-relative-imports': 'warn' as const,
+        '@dczajkowski/ordered-imports': 'warn' as const,
+      },
+    },
   },
   rules: {
     'enum-value-name': enumValueName as unknown as RuleDefinition,
@@ -23,15 +32,7 @@ const plugin = {
   processors: {},
 } satisfies ESLint.Plugin;
 
-plugin.configs.recommended = {
-  plugins: {
-    '@dczajkowski': plugin,
-  },
-  rules: {
-    '@dczajkowski/enum-value-name': 'error',
-    '@dczajkowski/no-relative-imports': 'warn',
-    '@dczajkowski/ordered-imports': 'warn',
-  },
-};
+// Set the plugin object in the recommended config to enable usage with ESLint flat config.
+plugin.configs.recommended.plugins['@dczajkowski'] = plugin;
 
 export default plugin;
