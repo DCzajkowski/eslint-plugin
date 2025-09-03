@@ -1,5 +1,5 @@
 # @dczajkowski/eslint-plugin
-This is an [eslint](https://eslint.org/) plugin that provides several eslint rules that are not available out of the box.
+This is an [eslint](https://eslint.org/) plugin that provides useful eslint rules.
 
 ## Installation
 ```bash
@@ -10,14 +10,31 @@ yarn add -D @dczajkowski/eslint-plugin
 pnpm add -D @dczajkowski/eslint-plugin
 ```
 
-## Setup (ESLint 9+ flat config)
-In your `eslint.config.js` config:
+## Setup
+
+> Note: This setup requires ESLint 9 with flat config.
+
+### Recommended config — all rules enabled
+In `eslint.config.mjs`:
 ```js
 import { defineConfig } from 'eslint/config';
 import dczajkowski from '@dczajkowski/eslint-plugin';
 
-/** @type {import("eslint").Linter.Config[]} */
 export default defineConfig([
+  // ...
+  dczajkowski.configs.recommended,
+  // ...
+]);
+```
+
+### Enable only a few rules
+In `eslint.config.mjs`:
+```js
+import { defineConfig } from 'eslint/config';
+import dczajkowski from '@dczajkowski/eslint-plugin';
+
+export default defineConfig([
+  // ...
   {
     'plugins': {
       '@dczajkowski': dczajkowski,
@@ -28,21 +45,8 @@ export default defineConfig([
       '@dczajkowski/ordered-imports': 'warn',
     },
   },
+  // ...
 ]);
-```
-
-## Setup (ESLint 9 legacy config)
-In your `.eslintrc` config:
-
-```json
-{
-  "plugins": ["@dczajkowski"],
-  "rules": {
-    "@dczajkowski/enum-value-name": "error",
-    "@dczajkowski/no-relative-imports": "warn",
-    "@dczajkowski/ordered-imports": "warn"
-  }
-}
 ```
 
 ## Available Rules
