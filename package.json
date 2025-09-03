@@ -1,10 +1,11 @@
 {
   "name": "@dczajkowski/eslint-plugin",
-  "version": "0.7.0-rc.1",
+  "version": "0.7.0-rc.2",
   "license": "MIT",
   "scripts": {
     "test": "jest",
     "lint": "eslint . --max-warnings=0",
+    "prepublishOnly": "yarn lint && yarn test && yarn build",
     "build": "tsup src/index.ts --format cjs,esm --dts --clean --sourcemap"
   },
   "type": "module",
