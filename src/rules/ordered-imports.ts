@@ -1,6 +1,13 @@
-import { AST_NODE_TYPES, TSESLint, TSESTree } from '@typescript-eslint/utils';
+import { TSESLint } from '@typescript-eslint/utils';
 import _ from 'lodash';
-import { createRule, importDeclarationToImportStatement, ImportStatement, isIdentifier, isImport } from '../helpers';
+import {
+  createRule,
+  importDeclarationToImportStatement,
+  importSpecifierToSpecifierStatement,
+  ImportStatement,
+  isImport,
+  isImportSpecifier,
+} from '../helpers';
 
 const sortImportStatements = (importStatements: ImportStatement[]): ImportStatement[] =>
   _.sortBy(
@@ -121,13 +128,12 @@ export const orderedImports = createRule({
         }
       },
       ImportDeclaration(node) {
-        const specifiers = node.specifiers.filter(
-          (importClause): importClause is TSESTree.ImportSpecifier =>
-            importClause.type === AST_NODE_TYPES.ImportSpecifier,
-        );
+        const specifiers = node.specifiers
+          .filter(isImportSpecifier)
+          .map(importSpecifierToSpecifierStatement(sourceCode));
 
-        const localIdentifiers = specifiers.map((specifier) => specifier.local);
-        const sortedLocalIdentifiers = _.sortBy(localIdentifiers, (identifier) => identifier.name);
+        const localIdentifiers = specifiers;
+        const sortedLocalIdentifiers = _.sortBy(localIdentifiers, (specifier) => specifier.local.name.toLowerCase());
 
         if (!_.isEqual(localIdentifiers, sortedLocalIdentifiers)) {
           context.report({
@@ -138,17 +144,14 @@ export const orderedImports = createRule({
               const lastSpecifier = _.last(specifiers)!;
 
               const sortedSpecifiersText = sortedLocalIdentifiers
-                .map((identifier) => {
-                  const imported = specifiers.find((specifier) => specifier.local.name === identifier.name)!
-                    .imported as TSESTree.Identifier;
+                .map(({ details: { textBefore, text, textAfter } }) => {
+                  const specifierText = `${textBefore}${text}${textAfter}`.trim();
 
-                  return imported.name !== identifier.name ? `${imported.name} as ${identifier.name}` : identifier.name;
+                  return specifierText.startsWith('//') ? `\n${specifierText}` : specifierText;
                 })
                 .join(', ');
 
-              const importText = sortedSpecifiersText;
-
-              return fixer.replaceTextRange([firstSpecifier.range[0], lastSpecifier.range[1]], importText);
+              return fixer.replaceTextRange([firstSpecifier.range[0], lastSpecifier.range[1]], sortedSpecifiersText);
             },
           });
         }

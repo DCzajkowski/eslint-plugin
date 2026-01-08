@@ -12,7 +12,7 @@ export const createRule = ESLintUtils.RuleCreator<ExamplePluginDocs>((name) => {
   return `https://github.com/DCzajkowski/eslint-plugin#dczajkowski${name}`;
 });
 
-interface ImportStatementDetails {
+interface Details {
   text: string;
   textBefore: string;
   textAfter: string;
@@ -20,32 +20,44 @@ interface ImportStatementDetails {
 
 export interface ImportStatement extends TSESTree.ImportDeclaration {
   initialPosition: number;
-  details: ImportStatementDetails;
+  details: Details;
   previousImportDeclaration: TSESTree.ImportDeclaration | null;
+}
+
+interface SpecifierStatement extends TSESTree.ImportSpecifier {
+  initialPosition: number;
+  details: Details;
+  previousImportSpecifier: TSESTree.ImportSpecifier | null;
 }
 
 export const isImport = (statement: TSESTree.ProgramStatement): statement is TSESTree.ImportDeclaration =>
   statement.type === AST_NODE_TYPES.ImportDeclaration;
 
+export const isIdentifier = (node: TSESTree.Node): node is TSESTree.Identifier =>
+  node.type === AST_NODE_TYPES.Identifier;
+
+export const isImportSpecifier = (importClause: TSESTree.ImportClause): importClause is TSESTree.ImportSpecifier =>
+  importClause.type === AST_NODE_TYPES.ImportSpecifier;
+
 export const details = (
   sourceCode: TSESLint.SourceCode,
-  importDeclaration: TSESTree.ImportDeclaration,
+  node: TSESTree.ImportDeclaration | TSESTree.ImportSpecifier,
   initialPosition: number,
-): ImportStatementDetails => {
-  const tokenBefore = sourceCode.getTokenBefore(importDeclaration);
-  const tokenAfter = sourceCode.getTokenAfter(importDeclaration);
+): Details => {
+  const tokenBefore = sourceCode.getTokenBefore(node);
+  const tokenAfter = sourceCode.getTokenAfter(node);
 
-  const text = sourceCode.getText(importDeclaration);
+  const text = sourceCode.getText(node);
 
   const textBefore = sourceCode
-    .getText(importDeclaration, tokenBefore ? importDeclaration.range[0] - tokenBefore.range[1] : Infinity)
+    .getText(node, tokenBefore ? node.range[0] - tokenBefore.range[1] : Infinity)
     .replace(new RegExp(`${_.escapeRegExp(text)}$`, 'gm'), '');
 
   return {
     text,
     textBefore: initialPosition === 0 && textBefore.length === 0 ? '\n' : textBefore,
     textAfter: sourceCode
-      .getText(importDeclaration, 0, tokenAfter ? tokenAfter.range[0] - importDeclaration.range[1] : Infinity)
+      .getText(node, 0, tokenAfter ? tokenAfter.range[0] - node.range[1] : Infinity)
       .replace(new RegExp(`^${_.escapeRegExp(text)}`, 'gm'), '')
       .replace(/\n.+$/gm, '')
       .replace(/\n$/, ''),
@@ -63,4 +75,17 @@ export const importDeclarationToImportStatement =
     initialPosition,
     previousImportDeclaration: importDeclarations[initialPosition - 1] ?? null,
     details: details(sourceCode, importDeclaration, initialPosition),
+  });
+
+export const importSpecifierToSpecifierStatement =
+  (sourceCode: TSESLint.SourceCode) =>
+  (
+    importSpecifier: TSESTree.ImportSpecifier,
+    initialPosition: number,
+    importSpecifiers: TSESTree.ImportSpecifier[],
+  ): SpecifierStatement => ({
+    ...importSpecifier,
+    initialPosition,
+    previousImportSpecifier: importSpecifiers[initialPosition - 1] ?? null,
+    details: details(sourceCode, importSpecifier, initialPosition),
   });

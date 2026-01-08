@@ -392,5 +392,26 @@ import { X } from 'z'
 `,
       ],
     },
+    {
+      code: `import {
+  UnknownAction,
+  combineReducers,
+  createAction,
+  createReducer,
+  Reducer,
+  // In this case we want the base type.
+  Store,
+} from '@reduxjs/toolkit'`,
+      errors: [{ messageId: 'importSpecifiersMustBeAlphabetized', line: 1 }],
+      output:
+        `import {
+  combineReducers, createAction, createReducer, Reducer,` +
+        // This trailing space is not ideal, but it's acceptable assuming users have trimTrailingWhitespace enabled or use
+        // Prettier.
+        ' \n' +
+        `// In this case we want the base type.
+  Store, UnknownAction,
+} from '@reduxjs/toolkit'`,
+    },
   ],
 });
