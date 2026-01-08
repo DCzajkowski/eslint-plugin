@@ -14,23 +14,44 @@ ruleTester.run('ordered-imports', orderedImports, {
     {
       filename: 'file-with-imports.ts',
       code: `
-      import 'a';
-      import 'b';
-      import '../../a';
-      import '../../b';
-      import '../a';
-      import '../b';
-      import './a';
-      import './b';
-      `,
+import 'a';
+import 'b';
+import '../../a';
+import '../../b';
+import '../a';
+import '../b';
+import './a';
+import './b';
+`,
     },
     {
       filename: 'file-with-imports.ts',
       code: `
-      import 'a';
-      import 'b';
-      const a: string = ''
-      `,
+import 'a';
+import 'b';
+const a: string = ''
+`,
+    },
+    {
+      filename: 'file-with-import-specifiers.ts',
+      code: `
+import { A, X, Y, Z } from 'a';
+import { B, C } from 'b';
+import { C, D, E } from 'c';
+`,
+    },
+    {
+      filename: 'file-with-multiline-import-specifiers.ts',
+      code: `
+import {
+  A,
+  X,
+  Y,
+  Z,
+} from 'a';
+import { B, C } from 'b';
+import { C, D, E } from 'c';
+`,
     },
   ],
 
@@ -242,6 +263,134 @@ import 'f';
 import 'c';
 import 'd';
       `,
+    },
+    {
+      filename: 'file-with-import-specifiers.ts',
+      code: `import { YThing, XThing, ZThing, AThing } from 'a';`,
+      errors: [{ messageId: 'importSpecifiersMustBeAlphabetized', line: 1 }],
+      output: `import { AThing, XThing, YThing, ZThing } from 'a';`,
+    },
+    {
+      filename: 'file-with-multiline-import-specifiers.ts',
+      code: `import {
+  YThing,
+  XThing,
+  ZThing,
+  AThing,
+} from 'a';`,
+      errors: [{ messageId: 'importSpecifiersMustBeAlphabetized', line: 1 }],
+      output: `import {
+  AThing, XThing, YThing, ZThing,
+} from 'a';`,
+    },
+    {
+      filename: 'file-with-import-specifiers.ts',
+      code: `import { YThing, XThing, ZThing, AThing } from 'a';
+import { B, C } from 'b';
+import { C, E, D } from 'c';
+`,
+      errors: [
+        { messageId: 'importSpecifiersMustBeAlphabetized', line: 1 },
+        { messageId: 'importSpecifiersMustBeAlphabetized', line: 3 },
+      ],
+      output: `import { AThing, XThing, YThing, ZThing } from 'a';
+import { B, C } from 'b';
+import { C, D, E } from 'c';
+`,
+    },
+    {
+      filename: 'file-with-multiline-import-specifiers.ts',
+      code: `import {
+  X,
+  Y,
+  Z,
+  A
+} from 'a';
+import { B, C } from 'b';
+import { E, C, D } from 'c';
+`,
+      errors: [
+        { messageId: 'importSpecifiersMustBeAlphabetized', line: 1 },
+        { messageId: 'importSpecifiersMustBeAlphabetized', line: 8 },
+      ],
+      output: `import {
+  A, X, Y, Z
+} from 'a';
+import { B, C } from 'b';
+import { C, D, E } from 'c';
+`,
+    },
+    {
+      filename: 'mixed-file.ts',
+      code: `import BModule from 'b';
+import { B, C, A } from 'z';
+import * as all from 'c'
+import {
+  X,
+  Z,
+  Y,
+  A
+} from 'a'
+import { E, C, D } from 'd';
+`,
+      errors: [
+        { messageId: 'importsMustBeAlphabetized', line: 1 },
+        { messageId: 'importSpecifiersMustBeAlphabetized', line: 2 },
+        { messageId: 'importSpecifiersMustBeAlphabetized', line: 4 },
+        { messageId: 'importSpecifiersMustBeAlphabetized', line: 10 },
+      ],
+      output: [
+        `import {
+  X,
+  Z,
+  Y,
+  A
+} from 'a'
+import BModule from 'b';
+import * as all from 'c'
+import { E, C, D } from 'd';
+import { B, C, A } from 'z';
+`,
+        `import {
+  A, X, Y, Z
+} from 'a'
+import BModule from 'b';
+import * as all from 'c'
+import { C, D, E } from 'd';
+import { A, B, C } from 'z';
+`,
+      ],
+    },
+    {
+      // Test the sort is stable.
+      filename: 'mixed-file.ts',
+      code: `import { X } from 'z'
+import { D, A } from 'b'
+import { Y } from 'a'
+import { B, C } from 'b'
+import YModule from 'y'
+import 'module-m'
+`,
+      errors: [
+        { messageId: 'importsMustBeAlphabetized', line: 1 },
+        { messageId: 'importSpecifiersMustBeAlphabetized', line: 2 },
+      ],
+      output: [
+        `import { Y } from 'a'
+import { D, A } from 'b'
+import { B, C } from 'b'
+import 'module-m'
+import YModule from 'y'
+import { X } from 'z'
+`,
+        `import { Y } from 'a'
+import { A, D } from 'b'
+import { B, C } from 'b'
+import 'module-m'
+import YModule from 'y'
+import { X } from 'z'
+`,
+      ],
     },
   ],
 });

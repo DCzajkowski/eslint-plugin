@@ -1,6 +1,6 @@
-import { TSESLint } from '@typescript-eslint/utils';
+import { AST_NODE_TYPES, TSESLint, TSESTree } from '@typescript-eslint/utils';
 import _ from 'lodash';
-import { createRule, importDeclarationToImportStatement, ImportStatement, isImport } from '../helpers';
+import { createRule, importDeclarationToImportStatement, ImportStatement, isIdentifier, isImport } from '../helpers';
 
 const sortImportStatements = (importStatements: ImportStatement[]): ImportStatement[] =>
   _.sortBy(
@@ -65,6 +65,7 @@ export const orderedImports = createRule({
     },
     messages: {
       importsMustBeAlphabetized: 'Imports must be alphabetized',
+      importSpecifiersMustBeAlphabetized: 'Import specifiers must be alphabetized',
     },
     fixable: 'code',
     schema: [],
@@ -115,6 +116,39 @@ export const orderedImports = createRule({
                 lastActualImportStatement.range[1] + lastActualImportStatement.details.textAfter.trimEnd().length;
 
               return fixer.replaceTextRange([groupBeginIndex, groupEndIndex], importBlockText);
+            },
+          });
+        }
+      },
+      ImportDeclaration(node) {
+        const specifiers = node.specifiers.filter(
+          (importClause): importClause is TSESTree.ImportSpecifier =>
+            importClause.type === AST_NODE_TYPES.ImportSpecifier,
+        );
+
+        const localIdentifiers = specifiers.map((specifier) => specifier.local);
+        const sortedLocalIdentifiers = _.sortBy(localIdentifiers, (identifier) => identifier.name);
+
+        if (!_.isEqual(localIdentifiers, sortedLocalIdentifiers)) {
+          context.report({
+            node,
+            messageId: 'importSpecifiersMustBeAlphabetized',
+            fix: (fixer: TSESLint.RuleFixer): TSESLint.RuleFix => {
+              const firstSpecifier = _.first(specifiers)!;
+              const lastSpecifier = _.last(specifiers)!;
+
+              const sortedSpecifiersText = sortedLocalIdentifiers
+                .map((identifier) => {
+                  const imported = specifiers.find((specifier) => specifier.local.name === identifier.name)!
+                    .imported as TSESTree.Identifier;
+
+                  return imported.name !== identifier.name ? `${imported.name} as ${identifier.name}` : identifier.name;
+                })
+                .join(', ');
+
+              const importText = sortedSpecifiersText;
+
+              return fixer.replaceTextRange([firstSpecifier.range[0], lastSpecifier.range[1]], importText);
             },
           });
         }
