@@ -93,9 +93,9 @@ import { test6 } from './../src/test6'
 ```
 
 ### @dczajkowski/ordered-imports
-This rule enforces alphabetized order for imports. There is an auto-fixer in place that corrects the order if it's wrong.
-It checks for order between imports that don't have an empty line between them. Those that have an empty line, are ordered separately.
-When auto-fixing to the correct order, it also moves the comments along with the group of imports.
+This rule enforces alphabetized order for imports. Starting with version 1.1.0, it also sorts import specifiers (that is, the named imports within curly braces).
+
+This rule tries to mimic the behavior of VSCode's `Organize Imports` feature as closely as possible. If you find any differences between the two, please open an issue.
 
 #### Unordered Code Example:
 ```ts
@@ -151,6 +151,10 @@ import 'a'
 // 2nd multiline comment for d
 import 'd'
 ```
+
+#### Performance
+
+I've run this rule on a large monorepo project. It took 566 ms to lint ~2300 files and fix ~640 of them. Consecutive run with the files fixed took 213 ms. To get the scale, the `prettier/prettier` rule on the same monorepo with files already fixed took 14.471 ms to lint.
 
 ## Licence
 This project is under [The MIT License (MIT)](https://github.com/DCzajkowski/eslint-plugin/blob/master/LICENSE)
