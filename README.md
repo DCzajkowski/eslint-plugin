@@ -154,7 +154,7 @@ import 'd'
 
 #### Performance
 
-I've run this rule on a large monorepo project. It took 566 ms to lint ~2300 files and fix ~640 of them. Consecutive run with the files fixed took 213 ms. To get the scale, the `prettier/prettier` rule on the same monorepo with files already fixed took 14.471 ms to lint.
+I've run this rule on a large monorepo project. It took 566 ms to lint ~2300 files and fix ~640 of them. Consecutive run with the files fixed took 213 ms. To get the scale, the `prettier/prettier` rule on the same monorepo with files already fixed took 14,471 ms to lint.
 
 ## Licence
 This project is under [The MIT License (MIT)](https://github.com/DCzajkowski/eslint-plugin/blob/master/LICENSE)
