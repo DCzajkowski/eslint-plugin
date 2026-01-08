@@ -132,10 +132,9 @@ export const orderedImports = createRule({
           .filter(isImportSpecifier)
           .map(importSpecifierToSpecifierStatement(sourceCode));
 
-        const localIdentifiers = specifiers;
-        const sortedLocalIdentifiers = _.sortBy(localIdentifiers, (specifier) => specifier.local.name.toLowerCase());
+        const sortedSpecifiers = _.sortBy(specifiers, (specifier) => specifier.local.name.toLowerCase());
 
-        if (!_.isEqual(localIdentifiers, sortedLocalIdentifiers)) {
+        if (!_.isEqual(specifiers, sortedSpecifiers)) {
           context.report({
             node,
             messageId: 'importSpecifiersMustBeAlphabetized',
@@ -143,7 +142,7 @@ export const orderedImports = createRule({
               const firstSpecifier = _.first(specifiers)!;
               const lastSpecifier = _.last(specifiers)!;
 
-              const sortedSpecifiersText = sortedLocalIdentifiers
+              const sortedSpecifiersText = sortedSpecifiers
                 .map(({ details: { textBefore, text, textAfter } }) => {
                   const specifierText = `${textBefore}${text}${textAfter}`.trim();
 
