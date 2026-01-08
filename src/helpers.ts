@@ -33,9 +33,6 @@ interface SpecifierStatement extends TSESTree.ImportSpecifier {
 export const isImport = (statement: TSESTree.ProgramStatement): statement is TSESTree.ImportDeclaration =>
   statement.type === AST_NODE_TYPES.ImportDeclaration;
 
-export const isIdentifier = (node: TSESTree.Node): node is TSESTree.Identifier =>
-  node.type === AST_NODE_TYPES.Identifier;
-
 export const isImportSpecifier = (importClause: TSESTree.ImportClause): importClause is TSESTree.ImportSpecifier =>
   importClause.type === AST_NODE_TYPES.ImportSpecifier;
 
