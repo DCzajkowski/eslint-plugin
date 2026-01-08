@@ -61,6 +61,6 @@ export const importDeclarationToImportStatement =
   ): ImportStatement => ({
     ...importDeclaration,
     initialPosition,
-    previousImportDeclaration: _.get(importDeclarations, `[${initialPosition - 1}]`, null),
+    previousImportDeclaration: importDeclarations[initialPosition - 1] ?? null,
     details: details(sourceCode, importDeclaration, initialPosition),
   });

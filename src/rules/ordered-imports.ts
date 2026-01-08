@@ -78,45 +78,46 @@ export const orderedImports = createRule({
         const programBody = program.body;
 
         const importStatements = programBody.filter(isImport).map(importDeclarationToImportStatement(sourceCode));
-
         if (importStatements.length < 1) {
           return;
         }
 
         const importStatementsGrouped = groupImportStatements(importStatements);
 
-        const groups = _.zip(...[importStatementsGrouped, importStatementsGrouped].map((group) => _.cloneDeep(group)))
-          .map(([actual, expected]) => [actual as ImportStatement[], expected as ImportStatement[]])
-          .map(([actual, expected]) => [actual, sortImportStatements(expected)])
+        const groups = _.zip(...[importStatementsGrouped, importStatementsGrouped])
+          .map(([actual, expected]) => [actual!, sortImportStatements(expected!)])
           .filter(([actual, expected]) => !_.isEqual(actual, expected))
           .map(([actual, expected]) => [formatActual(actual), formatExpected(expected)]);
 
-        groups.forEach(([actualGroup, expectedGroup]) => {
+        for (const [actualGroup, expectedGroup] of groups) {
           const firstActualImportStatement = _.first(actualGroup)!;
-          const lastActualImportStatement = _.last(actualGroup)!;
-
-          const firstExpectedImportStatement = _.first(expectedGroup)!;
-          const lastExpectedImportStatement = _.last(expectedGroup)!;
-
-          firstExpectedImportStatement.details.textBefore = firstExpectedImportStatement.details.textBefore.trimStart();
-          lastExpectedImportStatement.details.textAfter = lastExpectedImportStatement.details.textAfter.trimEnd();
-
-          const importBlockText = expectedGroup
-            .map(({ details: { textBefore, text, textAfter } }) => `${textBefore}${text}${textAfter}`)
-            .join('');
-
-          const groupBeginIndex =
-            firstActualImportStatement.range[0] - firstActualImportStatement.details.textBefore.trimStart().length;
-          const groupEndIndex =
-            lastActualImportStatement.range[1] + lastActualImportStatement.details.textAfter.trimEnd().length;
 
           context.report({
             node: firstActualImportStatement,
             messageId: 'importsMustBeAlphabetized',
-            fix: (fixer: TSESLint.RuleFixer): TSESLint.RuleFix =>
-              fixer.replaceTextRange([groupBeginIndex, groupEndIndex], importBlockText),
+            fix: (fixer: TSESLint.RuleFixer): TSESLint.RuleFix => {
+              const lastActualImportStatement = _.last(actualGroup)!;
+
+              const firstExpectedImportStatement = _.first(expectedGroup)!;
+              const lastExpectedImportStatement = _.last(expectedGroup)!;
+
+              firstExpectedImportStatement.details.textBefore =
+                firstExpectedImportStatement.details.textBefore.trimStart();
+              lastExpectedImportStatement.details.textAfter = lastExpectedImportStatement.details.textAfter.trimEnd();
+
+              const importBlockText = expectedGroup
+                .map(({ details: { textBefore, text, textAfter } }) => `${textBefore}${text}${textAfter}`)
+                .join('');
+
+              const groupBeginIndex =
+                firstActualImportStatement.range[0] - firstActualImportStatement.details.textBefore.trimStart().length;
+              const groupEndIndex =
+                lastActualImportStatement.range[1] + lastActualImportStatement.details.textAfter.trimEnd().length;
+
+              return fixer.replaceTextRange([groupBeginIndex, groupEndIndex], importBlockText);
+            },
           });
-        });
+        }
       },
     };
   },
