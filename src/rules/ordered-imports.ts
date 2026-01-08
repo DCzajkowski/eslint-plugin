@@ -85,8 +85,7 @@ export const orderedImports = createRule({
         const importStatementsGrouped = groupImportStatements(importStatements);
 
         const groups = _.zip(...[importStatementsGrouped, importStatementsGrouped])
-          .map(([actual, expected]) => [actual as ImportStatement[], expected as ImportStatement[]])
-          .map(([actual, expected]) => [actual, sortImportStatements(expected)])
+          .map(([actual, expected]) => [actual!, sortImportStatements(expected!)])
           .filter(([actual, expected]) => !_.isEqual(actual, expected))
           .map(([actual, expected]) => [formatActual(actual), formatExpected(expected)]);
 
