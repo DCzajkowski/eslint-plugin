@@ -436,5 +436,46 @@ import A from 'a'
 `,
       errors: [{ messageId: 'importsMustBeAlphabetizedNoFix', line: 1 }],
     },
+    {
+      filename: 'mixed-with-side-effects-imports.ts',
+      code: `import './b.css'
+import './a.css'
+
+import B from 'b'
+import A from 'a'
+import C from 'c'
+`,
+      errors: [
+        { messageId: 'importsMustBeAlphabetizedNoFix', line: 1 },
+        { messageId: 'importsMustBeAlphabetized', line: 4 },
+      ],
+      output: `import './b.css'
+import './a.css'
+
+import A from 'a'
+import B from 'b'
+import C from 'c'
+`,
+    },
+    {
+      filename: 'mixed-with-side-effects-imports.ts',
+      code: `// eslint-disable-next-line @rule-tester/ordered-imports
+import './b.css'
+import './a.css'
+
+import B from 'b'
+import A from 'a'
+import C from 'c'
+`,
+      errors: [{ messageId: 'importsMustBeAlphabetized', line: 5 }],
+      output: `// eslint-disable-next-line @rule-tester/ordered-imports
+import './b.css'
+import './a.css'
+
+import A from 'a'
+import B from 'b'
+import C from 'c'
+`,
+    },
   ],
 });

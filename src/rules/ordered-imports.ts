@@ -109,7 +109,7 @@ export const orderedImports = createRule({
               messageId: 'importsMustBeAlphabetizedNoFix',
             });
 
-            return;
+            continue;
           }
 
           context.report({
