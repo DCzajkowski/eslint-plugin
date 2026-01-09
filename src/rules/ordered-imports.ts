@@ -1,6 +1,13 @@
 import { TSESLint } from '@typescript-eslint/utils';
 import _ from 'lodash';
-import { createRule, importDeclarationToImportStatement, ImportStatement, isImport } from '../helpers';
+import {
+  createRule,
+  importDeclarationToImportStatement,
+  importSpecifierToSpecifierStatement,
+  ImportStatement,
+  isImport,
+  isImportSpecifier,
+} from '../helpers';
 
 const sortImportStatements = (importStatements: ImportStatement[]): ImportStatement[] =>
   _.sortBy(
@@ -61,10 +68,13 @@ export const orderedImports = createRule({
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require import statements to be alphabetized.',
+      description: 'Require import statements to be sorted alphabetically.',
     },
     messages: {
-      importsMustBeAlphabetized: 'Imports must be alphabetized',
+      importsMustBeAlphabetized: 'Imports must be sorted alphabetically',
+      importsMustBeAlphabetizedNoFix:
+        'Imports must be sorted alphabetically (cannot be auto-fixed due to side-effect imports)',
+      importSpecifiersMustBeAlphabetized: 'Import specifiers must be sorted alphabetically',
     },
     fixable: 'code',
     schema: [],
@@ -92,6 +102,16 @@ export const orderedImports = createRule({
         for (const [actualGroup, expectedGroup] of groups) {
           const firstActualImportStatement = _.first(actualGroup)!;
 
+          // If contains side-effect imports, do not attempt to auto-fix.
+          if (actualGroup.some((importStatement) => importStatement.specifiers.length === 0)) {
+            context.report({
+              node: firstActualImportStatement,
+              messageId: 'importsMustBeAlphabetizedNoFix',
+            });
+
+            continue;
+          }
+
           context.report({
             node: firstActualImportStatement,
             messageId: 'importsMustBeAlphabetized',
@@ -115,6 +135,34 @@ export const orderedImports = createRule({
                 lastActualImportStatement.range[1] + lastActualImportStatement.details.textAfter.trimEnd().length;
 
               return fixer.replaceTextRange([groupBeginIndex, groupEndIndex], importBlockText);
+            },
+          });
+        }
+      },
+      ImportDeclaration(node) {
+        const specifiers = node.specifiers
+          .filter(isImportSpecifier)
+          .map(importSpecifierToSpecifierStatement(sourceCode));
+
+        const sortedSpecifiers = _.sortBy(specifiers, (specifier) => specifier.local.name.toLowerCase());
+
+        if (!_.isEqual(specifiers, sortedSpecifiers)) {
+          context.report({
+            node,
+            messageId: 'importSpecifiersMustBeAlphabetized',
+            fix: (fixer: TSESLint.RuleFixer): TSESLint.RuleFix => {
+              const firstSpecifier = _.first(specifiers)!;
+              const lastSpecifier = _.last(specifiers)!;
+
+              const sortedSpecifiersText = sortedSpecifiers
+                .map(({ details: { textBefore, text, textAfter } }) => {
+                  const specifierText = `${textBefore}${text}${textAfter}`.trim();
+
+                  return specifierText.startsWith('//') ? `\n${specifierText}` : specifierText;
+                })
+                .join(', ');
+
+              return fixer.replaceTextRange([firstSpecifier.range[0], lastSpecifier.range[1]], sortedSpecifiersText);
             },
           });
         }

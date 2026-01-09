@@ -93,64 +93,32 @@ import { test6 } from './../src/test6'
 ```
 
 ### @dczajkowski/ordered-imports
-This rule enforces alphabetized order for imports. There is an auto-fixer in place that corrects the order if it's wrong.
-It checks for order between imports that don't have an empty line between them. Those that have an empty line, are ordered separately.
-When auto-fixing to the correct order, it also moves the comments along with the group of imports.
+This rule enforces alphabetized order for imports. Starting with version 1.1.0, it also sorts import specifiers (that is, the named imports within curly braces).
 
-#### Unordered Code Example:
+This rule tries to mimic the behavior of VSCode's `Organize Imports` feature as closely as possible. If you find any differences between the two, please open an issue.
+
+#### Note on side-effect imports
+
+Side-effect imports (like `import 'module-name';`) are not auto-fixed. If they are not sorted, the rule will, report a violation, but it won't fix the order. This is to avoid potential issues with import order affecting runtime behavior.
+
+Example:
 ```ts
-import 'c' /* comment for c */
-/* comment for b */
-import 'b'
-import '../../c';
-import '../../b';
-import './b';
-import './c';
-
-/* eslint-disable ordered-imports */
-import 'z'
-// comment for y
-import 'y'
-import 'x'
-/* eslint-enable ordered-imports */
-
-import 'g'
-import 'f'
-
-// 1st multiline comment for d
-// 2nd multiline comment for d
-import 'd'
-// 1st multiline comment for a
-// 2nd multiline comment for a
-import 'a'
+import { X } from 'x';
+import 'a-side-effect-import'; // <-- this is breaking the sort order, which will be reported but not auto-fixed.
+import { B } from 'b';
 ```
-#### Corrected Code Example
+
+Manual fix:
 ```ts
-/* comment for b */
-import 'b'
-import 'c' /* comment for c */
-import '../../b';
-import '../../c';
-import './b';
-import './c';
+import 'a-side-effect-import'; // <-- move the side-effect import to the top and separate it with a blank line creating a new import group.
 
-/* eslint-disable ordered-imports */
-import 'z'
-// comment for y
-import 'y'
-import 'x'
-/* eslint-enable ordered-imports */
-
-import 'f'
-import 'g'
-
-// 1st multiline comment for a
-// 2nd multiline comment for a
-import 'a'
-// 1st multiline comment for d
-// 2nd multiline comment for d
-import 'd'
+import { X } from 'x'; // <-- these now will be auto-sorted, as the group does not contain side-effect imports anymore.
+import { B } from 'b';
 ```
+
+#### Performance
+
+I've run this rule on a large monorepo project. It took 566 ms to lint ~2300 files and fix ~640 of them. Consecutive run with the files fixed took 213 ms. To get the scale, the `prettier/prettier` rule on the same monorepo with files already fixed took 14,471 ms to lint.
 
 ## Licence
 This project is under [The MIT License (MIT)](https://github.com/DCzajkowski/eslint-plugin/blob/master/LICENSE)
