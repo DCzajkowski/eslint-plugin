@@ -418,7 +418,7 @@ import { X } from 'z'
 import 'a-side-effect-import'
 import A from 'a'
 `,
-      errors: [{ messageId: 'importsMustBeAlphabetized', line: 1 }],
+      errors: [{ messageId: 'importsMustBeAlphabetizedNoFix', line: 1 }],
     },
     {
       filename: 'mixed-with-side-effects-imports.ts',
@@ -426,7 +426,7 @@ import A from 'a'
 import './a-side-effect-import'
 import A from 'a'
 `,
-      errors: [{ messageId: 'importsMustBeAlphabetized', line: 1 }],
+      errors: [{ messageId: 'importsMustBeAlphabetizedNoFix', line: 1 }],
     },
     {
       filename: 'mixed-with-side-effects-imports.ts',
@@ -434,7 +434,7 @@ import A from 'a'
 import '../a-side-effect-import'
 import A from 'a'
 `,
-      errors: [{ messageId: 'importsMustBeAlphabetized', line: 1 }],
+      errors: [{ messageId: 'importsMustBeAlphabetizedNoFix', line: 1 }],
     },
   ],
 });

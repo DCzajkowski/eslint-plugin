@@ -68,11 +68,13 @@ export const orderedImports = createRule({
   meta: {
     type: 'problem',
     docs: {
-      description: 'Require import statements to be alphabetized.',
+      description: 'Require import statements to be sorted alphabetically.',
     },
     messages: {
-      importsMustBeAlphabetized: 'Imports must be alphabetized',
-      importSpecifiersMustBeAlphabetized: 'Import specifiers must be alphabetized',
+      importsMustBeAlphabetized: 'Imports must be sorted alphabetically',
+      importsMustBeAlphabetizedNoFix:
+        'Imports must be sorted alphabetically (cannot be auto-fixed due to side-effect imports)',
+      importSpecifiersMustBeAlphabetized: 'Import specifiers must be sorted alphabetically',
     },
     fixable: 'code',
     schema: [],
@@ -104,7 +106,7 @@ export const orderedImports = createRule({
           if (actualGroup.some((importStatement) => importStatement.specifiers.length === 0)) {
             context.report({
               node: firstActualImportStatement,
-              messageId: 'importsMustBeAlphabetized',
+              messageId: 'importsMustBeAlphabetizedNoFix',
             });
 
             return;
