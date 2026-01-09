@@ -322,7 +322,7 @@ import { C, D, E } from 'c';
     {
       filename: 'mixed-file.ts',
       code: `import BModule from 'b';
-import { B, C as Z, A } from 'z';
+import { B, C as A, Z } from 'z';
 import * as all from 'c'
 import {
   X,
@@ -348,7 +348,7 @@ import { E, C, D } from 'd';
 import BModule from 'b';
 import * as all from 'c'
 import { E, C, D } from 'd';
-import { B, C as Z, A } from 'z';
+import { B, C as A, Z } from 'z';
 `,
         `import {
   A, X, Y, Z
@@ -356,7 +356,7 @@ import { B, C as Z, A } from 'z';
 import BModule from 'b';
 import * as all from 'c'
 import { C, D, E } from 'd';
-import { A, B, C as Z } from 'z';
+import { C as A, B, Z } from 'z';
 `,
       ],
     },
