@@ -100,6 +100,16 @@ export const orderedImports = createRule({
         for (const [actualGroup, expectedGroup] of groups) {
           const firstActualImportStatement = _.first(actualGroup)!;
 
+          // If contains side-effect imports, do not attempt to auto-fix.
+          if (actualGroup.some((importStatement) => importStatement.specifiers.length === 0)) {
+            context.report({
+              node: firstActualImportStatement,
+              messageId: 'importsMustBeAlphabetized',
+            });
+
+            return;
+          }
+
           context.report({
             node: firstActualImportStatement,
             messageId: 'importsMustBeAlphabetized',

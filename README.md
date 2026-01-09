@@ -97,59 +97,23 @@ This rule enforces alphabetized order for imports. Starting with version 1.1.0, 
 
 This rule tries to mimic the behavior of VSCode's `Organize Imports` feature as closely as possible. If you find any differences between the two, please open an issue.
 
-#### Unordered Code Example:
+#### Note on side-effect imports
+
+Side-effect imports (like `import 'module-name';`) are not auto-fixed. If they are not sorted, the rule will, report a violation, but it won't fix the order. This is to avoid potential issues with import order affecting runtime behavior.
+
+Example:
 ```ts
-import 'c' /* comment for c */
-/* comment for b */
-import 'b'
-import '../../c';
-import '../../b';
-import './b';
-import './c';
-
-/* eslint-disable ordered-imports */
-import 'z'
-// comment for y
-import 'y'
-import 'x'
-/* eslint-enable ordered-imports */
-
-import 'g'
-import 'f'
-
-// 1st multiline comment for d
-// 2nd multiline comment for d
-import 'd'
-// 1st multiline comment for a
-// 2nd multiline comment for a
-import 'a'
+import { X } from 'x';
+import 'a-side-effect-import'; // <-- this is breaking the sort order, which will be reported but not auto-fixed.
+import { B } from 'b';
 ```
-#### Corrected Code Example
+
+Manual fix:
 ```ts
-/* comment for b */
-import 'b'
-import 'c' /* comment for c */
-import '../../b';
-import '../../c';
-import './b';
-import './c';
+import 'a-side-effect-import'; // <-- move the side-effect import to the top and separate it with a blank line creating a new import group.
 
-/* eslint-disable ordered-imports */
-import 'z'
-// comment for y
-import 'y'
-import 'x'
-/* eslint-enable ordered-imports */
-
-import 'f'
-import 'g'
-
-// 1st multiline comment for a
-// 2nd multiline comment for a
-import 'a'
-// 1st multiline comment for d
-// 2nd multiline comment for d
-import 'd'
+import { X } from 'x'; // <-- these now will be auto-sorted, as the group does not contain side-effect imports anymore.
+import { B } from 'b';
 ```
 
 #### Performance
