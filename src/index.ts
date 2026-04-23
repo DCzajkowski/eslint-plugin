@@ -3,7 +3,7 @@ import { RuleDefinition } from '@eslint/core';
 import { enumValueName } from './rules/enum-value-name';
 import { noRelativeImports } from './rules/no-relative-imports';
 import { orderedImports } from './rules/ordered-imports';
-import packageJson from '../package.json' assert { type: 'json' };
+import packageJson from '../package.json' with { type: 'json' };
 
 const plugin = {
   meta: {
