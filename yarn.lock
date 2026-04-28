@@ -715,6 +715,8 @@ __metadata:
   dependenciesMeta:
     esbuild:
       built: true
+    unrs-resolver:
+      built: true
   languageName: unknown
   linkType: soft
 

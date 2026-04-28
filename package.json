@@ -56,6 +56,9 @@
   "dependenciesMeta": {
     "esbuild": {
       "built": true
+    },
+    "unrs-resolver": {
+      "built": true
     }
   },
   "packageManager": "yarn@4.14.1"
