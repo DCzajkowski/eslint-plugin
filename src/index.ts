@@ -9,8 +9,7 @@ const plugin = {
   meta: {
     name: packageJson.name,
     version: packageJson.version,
-    // TSESLint.Linter.Plugin['meta'] does not yet have the 'namespace' property in its type.
-    ...{ namespace: '@dczajkowski' },
+    namespace: '@dczajkowski',
   },
   configs: {
     recommended: {
