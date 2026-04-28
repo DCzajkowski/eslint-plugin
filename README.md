@@ -12,7 +12,7 @@ pnpm add -D @dczajkowski/eslint-plugin
 
 ## Setup
 
-> Note: This setup requires ESLint 9 with flat config.
+> Note: This setup requires ESLint 9 or 10 with flat config.
 
 ### Recommended config — all rules enabled
 In `eslint.config.mjs`:
